@@ -1,0 +1,64 @@
+﻿html, body {
+    height: 100%;
+}
+
+#divChat {
+    height: 70%;
+    border: 1px double black;
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
+
+#divChatBox {
+    background-color: #008b8b;
+    height: 100%;
+    padding: 10px;
+}
+
+#divRight {
+    border: 1px double brown;
+    height: 100%;
+}
+
+#divAccount {
+    border: 1px double green;
+    height: 20%;
+}
+
+#divChats {
+    background-color: #008b8b;
+    height: 80%;
+    padding: 10px;
+}
+
+#divMessages {
+    background-color: white;
+    height: 90%;
+    padding-left: 20px;
+    overflow-y: scroll;
+    overflow-wrap: break-word;
+    margin: 0;
+}
+
+#divSendMessage {
+    margin-top: 10px;
+    /*margin-bottom: 10px;*/
+    height: 10%;
+}
+
+#divTextMessage {
+    padding-right: 0;
+}
+#divBtnSendMessage {
+    padding-left: 0;
+}
+
+#textMessage {
+    width: 100%;
+}
+
+#divNewChat {
+    height: 50px;
+    padding: 10px;
+    background-color: #008b8b;
+}

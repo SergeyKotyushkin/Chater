@@ -1,0 +1,13 @@
+﻿#divBtnLogin {
+    margin-top: 20px;
+}
+
+.vertical-center-parent{
+    display: table;
+}
+
+.vertical-center-children {
+    display:table-cell;
+    vertical-align:middle;
+    float:none;
+}

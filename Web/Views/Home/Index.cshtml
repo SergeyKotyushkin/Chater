@@ -1,0 +1,159 @@
+﻿@model Web.Models.HomeIndexModel
+
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>Chater</title>
+    <link href="~/Content/Css/Bootstrap/bootstrap.min.css" rel="stylesheet"/>
+    <link href="~/Content/Home/index.css" rel="stylesheet" />
+    <script src="~/Scripts/JQuery/jquery-1.9.1.min.js"></script>
+    <script src="~/Scripts/Bootstrap/bootstrap.min.js"></script>
+    <script src="~/Scripts/SignalR/jquery.signalR-2.2.0.min.js"></script>
+    <script src="/signalr/hubs/"></script>
+    <script src="~/Scripts/Home/index.js"></script>
+</head>
+<body>
+<div id="hiddenUserGuid"></div>
+<div id="hiddenChatGuid"></div>
+<div id="divLoginContainer" class="container">
+    <div id="divLogin" class="row text-center vertical-center-parent" style="width: 300px; height: 300px; background-color: #f5f5f5; border: 1px solid blue;">
+        <div class="vertical-center-children form-group">
+            <div class="h1">Login to "Chater"</div>
+            <div class="h3">Login</div>
+            <div class="col-md-offset-1 col-md-10">
+                <input type="text" name="textLogin" value="qwe" id="textLogin" class="form-control"/>
+            </div>
+            <div class="h3">Password</div>
+            <div class="col-md-offset-1 col-md-10">
+                <input type="text" name="textPassword" value="123" id="textPassword" class="form-control"/>
+            </div>
+            <div id="divBtnLogin">
+                <input type="button" name="btnLogin" value="Login" id="btnLogin" class="btn btn-primary"/>
+            </div>
+            <div id="divBtnRegister" class="text-center">
+                <input type="button" name="btnRegister" value="Register" id="btnRegister" class="btn btn-link"/>
+            </div>
+            <div id="divLoginAlert" class="alert alert-danger hidden"></div>
+        </div>
+    </div>
+</div>
+<div id="divRegistrationContainer" class="container">
+    <div id="divRegistration" class="row text-center vertical-center-parent" style="width: 300px; height: 300px; background-color: #f5f5f5; border: 1px solid blue;">
+        <div class="vertical-center-children form-group">
+            <div class="h1">Pass the Registration</div>
+            <div class="h3">Login</div>
+            <div class="col-md-offset-1 col-md-10">
+                <input type="text" name="textRegistrationLogin" value="" id="textRegistrationLogin" class="form-control"/>
+            </div>
+            <div class="h3">Password</div>
+            <div class="col-md-offset-1 col-md-10">
+                <input type="text" name="textRegistrationPassword" value="" id="textRegistrationPassword" class="form-control"/>
+            </div>
+            <div class="h3">UserName</div>
+            <div class="col-md-offset-1 col-md-10">
+                <input type="text" name="textRegistrationUserName" value="" id="textRegistrationUserName" class="form-control"/>
+            </div>
+            <div id="divBtnRegistrationOk">
+                <input type="button" name="btnRegistrationRegister" value="Register" id="btnRegistrationRegister" class="btn btn-primary"/>
+            </div>
+            <div id="divBtnRegistrationToMenu" class="text-center">
+                <input type="button" name="btnRegistrationCancel" value="Cancel" id="btnRegistrationCancel" class="btn btn-info"/>
+            </div>
+            <div id="divRegistrationAlert" class="alert hidden"></div>
+        </div>
+    </div>
+</div>
+<div id="divMenuContainer" class="container">
+    <div id="divMenu" class="row text-center vertical-center-parent" style="width: 300px; height: 300px; background-color: #f5f5f5; border: 1px solid blue;">
+        <div class="vertical-center-children">
+            <div class="col-md-12">
+                <input type="button" name="btnMenuChatsList" value="Chats" id="btnMenuChatsList" class="btn btn-primary"/>
+            </div>
+            <div class="col-md-12">
+                <input type="button" name="btnMenuNewChat" value="New Chat" id="btnMenuNewChat" class="btn btn-primary"/>
+            </div>
+            <div class="col-md-12">
+                <input type="button" name="btnMenuAddToChat" value="Add To Chat" id="btnMenuAddToChat" class="btn btn-primary"/>
+            </div>
+            <div class="col-md-12">
+                <input type="button" name="btnMenuExit" value="Exit" id="btnMenuExit" class="btn btn-primary"/>
+            </div>
+        </div>
+    </div>
+</div>
+<div id="divNewChatContainer" class="container">
+    <div id="divNewChat" class="row vertical-center-parent" style="width: 300px; height: 300px; background-color: #f5f5f5; border: 1px solid blue;">
+        <div class="vertical-center-children">
+            <div class="h1 text-center">Create New Chat</div>
+            <div class="col-md-12 form-group text-center">
+                <input type="text" name="textNewChat" value="New Chat" id="textNewChat" class="form-control"/>
+            </div>
+            <div class="col-md-12 form-group text-right">
+                <input type="button" name="btnNewChat" value="Create" id="btnNewChat" class="btn btn-primary"/>
+                <input type="button" name="btnNewChatToMenu" value="To Menu" id="btnNewChatToMenu" class="btn btn-default"/>
+            </div>
+        </div>
+    </div>
+</div>
+<div id="divAddToChatContainer" class="container">
+    <div id="divAddToChat" class="row vertical-center-parent" style="width: 300px; height: 300px; background-color: #f5f5f5; border: 1px solid blue;">
+        <div class="vertical-center-children">
+            <div class="h1 text-center">Add To Chat</div>
+            <div class="col-md-12 form-group text-center">
+                <select name="selectAddToChatChat" id="selectAddToChatChat" class="form-control"></select>
+            </div>
+            <div id="divAddToChatUsers" class="col-md-12 form-group" style="height: 40%; overflow-y: scroll; background-color: #e6e6fa;"></div>
+            <div class="col-md-12 form-group text-right">
+                <input type="button" name="btnAddToChatCommit" value="Commit" id="btnAddToChatCommit" class="btn btn-default"/>
+                <input type="button" name="btnAddToChatToMenu" value="To Menu" id="btnAddToChatToMenu" class="btn btn-default"/>
+            </div>
+        </div>
+    </div>
+</div>
+<div id="divMessengerContainer" class="container">
+    <div id="divMessenger" class="row vertical-center-parent" style="width: 300px; height: 300px; background-color: #f5f5f5; border: 1px solid blue;">
+        <div class="vertical-center-children">
+            <div class="form-group text-center">
+                <div id="labelChatName" class="h1"></div>
+                <div id="divMessages" class="row" style="margin: 0 auto; width: 250px; height: 200px; border: 1px solid blue;">
+
+                </div>
+            </div>
+            <div class="col-md-12">
+                <input type="text" name="textMessage" id="textMessage" class="form-control"/>
+            </div>
+            <div class="col-md-12 text-right">
+                <input type="button" name="btnMessengerChat" value="Send" id="btnMessengerSend" class="btn btn-primary"/>
+                <input type="button" name="btnMessengerToMenu" value="To Menu" id="btnMessengerToMenu" class="btn btn-default"/>
+            </div>
+        </div>
+    </div>
+</div>
+<div id="divChatsContainer" class="container">
+    <div id="divChats" class="row vertical-center-parent" style="width: 300px; height: 300px; background-color: #f5f5f5; border: 1px solid blue;">
+        <div class="vertical-center-children">
+            <div class="form-group text-center">
+                <div class="h1">Your Chats</div>
+            </div>
+            <div class="row">
+                <div id="divChatsList" class="row col-md-12"></div>
+            </div>
+            <div class="col-md-12 text-right">
+                <input type="button" name="btnChatsToMenu" value="To Menu" id="btnChatsToMenu" class="btn btn-default"/>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="container">
+    <div id="divChaters" class="row" style="width: 300px; height: 100px; background-color: #f5f5f5; border: 1px solid blue; overflow-wrap: break-word; overflow-y: auto; overflow-x: hidden;">
+
+    </div>
+</div>
+</body>
+</html>
