@@ -1,10 +1,13 @@
 ﻿using System;
 using System.Linq;
+using System.Threading.Tasks;
 using Logic.ChatRepository.Contracts;
 using Logic.ChatUserRepository.Contracts;
+using Logic.MessageRepository.Contracts;
 using Logic.Models;
 using Logic.UserRepository.Contracts;
 using Microsoft.AspNet.SignalR;
+using Microsoft.AspNet.SignalR.Messaging;
 using Newtonsoft.Json;
 
 namespace Web.SignalR.Hubs
@@ -14,27 +17,29 @@ namespace Web.SignalR.Hubs
         private readonly IUserRepository _userRepository;
         private readonly IChatRepository _chatRepository;
         private readonly IChatUserRepository _chatUserRepository;
+        private readonly IMessageRepository _messageRepository;
 
-        public ChatHub(IUserRepository userRepository, IChatRepository chatRepository, IChatUserRepository chatUserRepository)
+        public ChatHub(IUserRepository userRepository, IChatRepository chatRepository,
+            IChatUserRepository chatUserRepository, IMessageRepository messageRepository)
         {
             _userRepository = userRepository;
             _chatRepository = chatRepository;
             _chatUserRepository = chatUserRepository;
+            _messageRepository = messageRepository;
         }
 
-        public void Send(string chatGuid, string message)
+        public void Send(string chatGuid, string text)
         {
             var user = _userRepository.GetByConnectionId(Context.ConnectionId);
             if (user == null) return;
-            
-            Clients.Group(chatGuid).OnSendResult(user.UserName, message, chatGuid);
-        }
 
-        public void Connect(string login, string password)
-        {
-            Clients.All.OnConnected(login, true);
+            var messageOutput = new MessageOutput(user.UserName, text, DateTime.Now.ToString("G"));
+            var message = _messageRepository.Add(chatGuid, user.Guid, text);
+            if (message == null)
+                Clients.Caller.OnSendResult(messageOutput, chatGuid, false);
+            else
+                Clients.Group(chatGuid).OnSendResult(messageOutput, chatGuid, true);
         }
-
 
         // Login User
         public void Login(string login, string password)
@@ -128,7 +133,7 @@ namespace Web.SignalR.Hubs
         }
 
         // Отключение пользователя
-        public override System.Threading.Tasks.Task OnDisconnected(bool stopCalled)
+        public override Task OnDisconnected(bool stopCalled)
         {
             Disconnect();
 

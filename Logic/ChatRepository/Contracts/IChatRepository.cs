@@ -8,6 +8,8 @@ namespace Logic.ChatRepository.Contracts
 
         bool Remove(string guid);
 
+        Chat Get(string guid);
+
         Chat[] GetByIds(params string[] chatGuids);
     }
 }

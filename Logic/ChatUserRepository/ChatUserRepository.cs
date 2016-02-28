@@ -48,8 +48,8 @@ namespace Logic.ChatUserRepository
                 var client = GetElasticClient();
                 var hits =
                     client.Search<ChatUser>(s => s
-                        .Query(q => q.Match(m => m.Field("userGuid").Query(userGuid))))
-                        .Hits;
+                        .Query(q => q.Match(m => m.Field("userGuid").Query(userGuid)))
+                        .Index(EsIndex).Type(EsType)).Hits;
 
                 return hits.Select(hit => hit.Source).ToArray();
             }
@@ -86,8 +86,8 @@ namespace Logic.ChatUserRepository
                 var hitsCount =
                     client.Search<ChatUser>(s => s
                         .Query(q => q.Match(m => m.Field("chatGuid").Query(chatUser.ChatGuid)) && 
-                                    q.Match(m => m.Field("userGuid").Query(chatUser.UserGuid))))
-                        .Hits.Count();
+                                    q.Match(m => m.Field("userGuid").Query(chatUser.UserGuid)))
+                        .Index(EsIndex).Type(EsType)).Hits.Count();
 
                 return hitsCount == 0;
             }

@@ -20,13 +20,6 @@
 
     var chat = $.connection.chatHub;
 
-    chat.client.onConnected = function (username, isConnected) {
-        if (isConnected) {
-            $("#divChaters").append("<div><span>" + username + "</span></div>");
-        }
-    }
-
-
     // Login
     // on login result
     chat.client.onLoginResult = function (user, usersOnline, isLoginSuccess, message) {
@@ -95,9 +88,20 @@
     };
 
     // Messenger : on send
-    chat.client.onSendResult = function (username, message, chatGuid) {
-        if ($("#hiddenChatGuid").html() === chatGuid)
-            $("#divMessages").append("<div><strong>" + username + "</strong>: " + message + "</div>");
+    chat.client.onSendResult = function (messageOutput, chatGuid, result) {
+        if ($("#hiddenChatGuid").html() === chatGuid) {
+            if (result) {
+                $("#divMessages").append("<div><strong>" + messageOutput.UserName + " " +
+                    messageOutput.SendTime + "</strong>: " + messageOutput.Text + "</div>");
+            } else {
+                $("#divMessages").append("<div><span style=\"color: red\"><strong>" + messageOutput.UserName + " " +
+                    messageOutput.SendTime + "</strong>: " + messageOutput.Text + "</span></div>");
+            }
+
+            $("#divMessages").stop().animate({
+                scrollTop: $("#divMessages")[0].scrollHeight
+            }, 800);
+        }
     }
 
     // after users added to chat
@@ -176,7 +180,24 @@
             funHideAll();
             $("#divMessengerContainer").show();
             $("#labelChatName").html($(el).val());
-            $("#hiddenChatGuid").html($(el).attr("data-guid"));
+            var chatGuid = $(el).attr("data-guid");
+
+            if ($("#hiddenChatGuid").val() !== chatGuid) {
+                $.get("api/messages/" + chatGuid).done(function (result) {
+                    var messageOutputed = jQuery.parseJSON(result);
+                    $("#divMessages").empty();
+                    for (var i = 0; i < messageOutputed.length; i++) {
+                        if(messageOutputed[i] === null) continue;
+                        $("#divMessages").append("<div><strong>" + messageOutputed[i].UserName +
+                            " " + messageOutputed[i].SendTime + "</strong>: " +
+                            messageOutputed[i].Text + "</div>");
+                    }
+                });
+                $("#hiddenChatGuid").html(chatGuid);
+                $("#divMessages").stop().animate({
+                    scrollTop: $("#divMessages")[0].scrollHeight
+                }, 800);
+            }
         };
 
         $("#btnMenuChatsList").click(function () {

@@ -70,8 +70,12 @@
     <Compile Include="ChatUserRepository\Contracts\IChatUserRepository.cs" />
     <Compile Include="ElasticRepository\Contracts\IElasticRepository.cs" />
     <Compile Include="ElasticRepository\ElasticRepository.cs" />
+    <Compile Include="MessageRepository\Contracts\IMessageRepository.cs" />
+    <Compile Include="MessageRepository\MessageRepository.cs" />
     <Compile Include="Models\Chat.cs" />
     <Compile Include="Models\ChatUser.cs" />
+    <Compile Include="Models\Message.cs" />
+    <Compile Include="Models\MessageOutput.cs" />
     <Compile Include="Models\User.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="StructureMap\AllRegistry.cs" />

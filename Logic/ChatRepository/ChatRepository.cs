@@ -1,6 +1,7 @@
 ﻿using System.Linq;
 using Logic.ChatRepository.Contracts;
 using Logic.Models;
+using Nest;
 
 namespace Logic.ChatRepository
 {
@@ -40,7 +41,24 @@ namespace Logic.ChatRepository
                 return false;
             }
         }
-        
+
+        public Chat Get(string guid)
+        {
+            try
+            {
+                var client = GetElasticClient();
+                var hits = client.Search<Chat>(s => s.Query(q => q.Match(m => m.Field("guid").Query(guid)))
+                                                     .Index(EsIndex).Type(EsType)).Hits;
+
+                var result = hits as IHit<Chat>[] ?? hits.ToArray();
+                return result.Count() == 1? result[0].Source: null;
+            } 
+            catch
+            {
+                return null;
+            }
+        }
+
         public Chat[] GetByIds(params string[] chatGuids)
         {
             try

@@ -102,13 +102,13 @@
   <ItemGroup>
     <Compile Include="ControllersApi\ChatsController.cs" />
     <Compile Include="ControllersApi\ChatUsersController.cs" />
+    <Compile Include="ControllersApi\MessagesController.cs" />
     <Compile Include="ControllersApi\UsersController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
     <Compile Include="SignalR\Hubs\ChatHub.cs" />
-    <Compile Include="Models\HomeIndexModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SignalR\Startup.cs" />
   </ItemGroup>

@@ -1,5 +1,6 @@
 ﻿using Logic.ChatRepository;
 using Logic.ChatUserRepository;
+using Logic.MessageRepository;
 using Logic.UserRepository;
 using Microsoft.AspNet.SignalR;
 using Microsoft.Owin;
@@ -15,7 +16,9 @@ namespace Web.SignalR
         public void Configuration(IAppBuilder app)
         {
             GlobalHost.DependencyResolver.Register(typeof (ChatHub),
-                () => new ChatHub(new UserRepository(), new ChatRepository(), new ChatUserRepository()));
+                () =>
+                    new ChatHub(new UserRepository(), new ChatRepository(), new ChatUserRepository(),
+                        new MessageRepository()));
             app.MapSignalR();
         }
     }

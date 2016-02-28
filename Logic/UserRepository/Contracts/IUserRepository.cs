@@ -17,5 +17,7 @@ namespace Logic.UserRepository.Contracts
         User[] GetAll();
 
         User[] GetAllOnline();
+
+        User[] GetByGuids(params string[] userGuids);
     }
 }

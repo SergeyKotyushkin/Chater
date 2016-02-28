@@ -135,6 +135,22 @@ namespace Logic.UserRepository
             }
         }
 
+        public User[] GetByGuids(params string[] userGuids)
+        {
+            try
+            {
+                var client = GetElasticClient();
+                var result = client.MultiGet(m => m.GetMany<User>(userGuids).Index(EsIndex).Type(EsType));
+                var hits = result.GetMany<User>(userGuids);
+
+                return hits.Select(hit => hit.Source).Where(hit => hit != null).ToArray();
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
 
         private bool CheckUser(User user)
         {
