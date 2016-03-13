@@ -1,0 +1,60 @@
+﻿@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html style="height: 100%;">
+<head>
+    <meta name="viewport" content="width=device-width"/>
+    <title>Chater</title>
+    <link href="~/Content/Css/Bootstrap/bootstrap.min.css" rel="stylesheet"/>
+</head>
+<body style="height: 100%;">
+<div id="divChater" class="container hidden" style="width: 100%; height: 100%;">
+    <div class="row" style="margin: 0 auto; width: 90%; height: 10%; background-color: #f5f5dc; border: 1px solid #008b8b;">
+        <div style="float: right; height: 100%;">
+            <input type="button" id="btnClose" value="Close" style="color: white; background-color: #dc143c; border: 1px solid #800000; margin-top: 5px; margin-right: 5px;"/>
+        </div>
+    </div>
+    <div class="row" style="margin: 0 auto; width: 90%; height: 90%;">
+        <div id="divChats" class="col-md-3" style="height: 100%; background-color: #f0ffff; border: 1px solid #008b8b;">
+
+        </div>
+        <div id="divChat" class="col-md-6" style="height: 100%; background-color: #f0ffff; border: 1px solid #008b8b;">
+
+        </div>
+        <div id="divUsers" class="col-md-3" style="height: 100%; background-color: #f0ffff; border: 1px solid #008b8b;">
+            <h4>Users</h4>
+            <ul data-bind="foreach: users.slice(0).sort(function(a,b){return a.name.localeCompare(b.name)})">
+                <li>
+                    <span data-bind="text: name, attr: { 'data-guid': guid }"></span>
+                    <span data-bind="visible: isOnline" style="background-color: green; color: white;">online</span>
+                    <span data-bind="visible: !isOnline" style="background-color: red; color: white;">offline</span>
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>
+<div id="divLogin" class="container" style="width: 100%; height: 100%;">
+    <div class="container" style="height: 100%; display: table;">
+        <div class="row text-center" style="display: table-cell; vertical-align: middle;">
+            <div class="h2">Login here</div>
+            <div class="h4">Login</div>
+            <div><input type="text" id="tbLogin" value="qwe" style="font-size: 16px;"/></div>
+            <div class="h4">Password</div>
+            <div><input type="text" id="tbPassword" value="123" style="font-size: 16px;"/></div>
+            <input type="button" id="btnLogin" class="btn btn-primary h3" value="Login"/>
+            <div id="divLoginError" class="alert alert-danger hidden" style="margin-top: 10px;"></div>
+        </div>
+    </div>
+</div>
+
+<script src="~/Scripts/JQuery/jquery-1.9.1.min.js"></script>
+<script src="~/Scripts/Bootstrap/bootstrap.min.js"></script>
+<script src="~/Scripts/Knockout/knockout-3.4.0.js"></script>
+<script src="~/Scripts/SignalR/jquery.signalR-2.2.0.min.js"></script>
+<script src="/signalr/hubs/"></script>
+<script src="~/Scripts/Home/chat.js"></script>
+</body>
+</html>

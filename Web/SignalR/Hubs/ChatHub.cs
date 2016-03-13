@@ -7,7 +7,6 @@ using Logic.MessageRepository.Contracts;
 using Logic.Models;
 using Logic.UserRepository.Contracts;
 using Microsoft.AspNet.SignalR;
-using Microsoft.AspNet.SignalR.Messaging;
 using Newtonsoft.Json;
 
 namespace Web.SignalR.Hubs

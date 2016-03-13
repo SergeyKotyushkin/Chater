@@ -1,77 +1,99 @@
-﻿var chat = $.connection.chatHub;
-
-// on group created
-chat.client.onGroupCreated = function (name, isCreated) {
-    if (isCreated) {
-        $("#ulChats").append("<li><input type=\"button\" value=\"" + name +"\" data-chat=\""+name+"\" onclick=\"chooseChat(this)\"/></div>");
+﻿$(document).ready(function() {
+    
+    var chaterViewModel = {
+        users: ko.observableArray()
     }
-}
 
-// on getting message
-chat.client.retriveMessage = function (name, message) {
-    $("#divMessages").append("<div><strong>" + name + ": </strong>" + message + "</div>");
-    $("#divMessages").stop().animate({
-        scrollTop: $("#divMessages")[0].scrollHeight
-    }, 800);
-    $("#textMessage").focus();
-};
 
-// on user connected
-chat.client.onConnected = function (login, isConnected) {
-    if (isConnected) {
-        $("#divMessages").append("<div><strong>" + login + " connected to chat</strong></div>");
+    // Users methods - Start
+    chaterViewModel.users.add = function (guid, name, isOnline) {
+        this.push({ guid: guid, name: name, isOnline: isOnline });
+    };
+
+    chaterViewModel.users.edit = function(guid, name, isOnline) {
+        var index = this.findIndex(guid);
+        this.replace(this()[index], { guid: guid, name: name, isOnline: isOnline });
+    };
+
+    chaterViewModel.users.addOrEdit = function (guid, name, isOnline) {
+        this.findIndex(guid) === -1 ? this.add(guid, name, isOnline) : this.edit(guid, name, isOnline);
+    };
+
+    chaterViewModel.users.remove = function (guid) {
+        this.remove(function (user) { return user.guid === guid; });
+    };
+
+    chaterViewModel.users.findIndex = function (guid) {
+        var items = this();
+        for (var i = 0; i < items.length; i++)
+            if (items[i].guid === guid) return i;
+        return -1;
+    };
+
+    chaterViewModel.users.find = function (guid) {
+        var items = this();
+        var elem = ko.utils.arrayFirst(items, function (user) { return user.guid === guid; });
+        if (elem === undefined || elem === null)
+            alert("und");
+        return elem;
+    };
+    // Users methods - End
+
+    ko.applyBindings(chaterViewModel);
+    
+    var chater = $.connection.chaterHub;
+
+    // Login: On Result To Caller
+    chater.client.onLoginCaller = function (users, isLoginSuccess, message) {
+        if (isLoginSuccess) {
+            var jsonUsers = jQuery.parseJSON(users);
+            for (var i = 0; i < jsonUsers.length; i++)
+                chaterViewModel.users.addOrEdit(jsonUsers[i].Guid, jsonUsers[i].UserName, jsonUsers[i].IsOnline);
+
+            $("#divLogin").addClass("hidden");
+            $("#divChater").removeClass("hidden");
+        } else {
+            var divLoginError = $("#divLoginError");
+            divLoginError.removeClass("hidden");
+            divLoginError.html(message);
+        }
     }
-}
 
-// set connection with server
-chat.connection.start().done(function () {
-    // on connection setuped
-    $("#btnSendMessage").click(function () {
-        var message = $("#textMessage").val();
-        chat.server.send("Let", message);
+    // Login: On Result To Others
+    chater.client.onLoginOthers = function (guid, userName, isOnline) {
+        chaterViewModel.users.addOrEdit(guid, userName, isOnline);
+    }
 
-        $("#textMessage").val("");
+
+    // Disconnect: On Result To Caller
+    chater.client.onDisconnectCaller = function () {
+        //$.connection.hub.stop();
+        location.reload(true);
+    }
+
+    // Disconnect: On Result To Others
+    chater.client.onDisconnectOthers = function (guid) {
+        var user = chaterViewModel.users.find(guid);
+        user.isOnline = false;
+        chaterViewModel.users.edit(user.guid, user.name, user.isOnline);
+    }
+
+
+
+    chater.connection.start().done(function () {
+
+        // Button to login Click
+        $("#btnLogin").click(function () {
+
+            $("#divLoginError").addClass("hidden");
+            var login = $("#tbLogin").val();
+            var password = $("#tbPassword").val();
+            chater.server.login(login, password);
+        });
+
+        // Menu -> Exit
+        $("#btnClose").click(function () {
+            chater.server.disconnect();
+        });
     });
-
-    $("#btnNewChat").click(function() {
-        $("#divMessages").empty();
-        var chatName = prompt("enter new chat name", "new chat");
-        chat.server.createNewGroup(chatName);
-        //chat.server.send(chatName, "dsd");
-    });
-});
-
-function chooseChat(el) {
-    $("#divMessages").empty();
-    chat.server.connect("User", $(el).attr("data-chat"));
-}
-
-//function createNewChat() {
-//    $("#divMessages").empty();
-//    var chatName = prompt("enter new chat name", "new chat");
-//    chat.server.createGroup(chatName);
-//}
-
-$(document).ready(function () {
-    $("#divMessages").hide();
-    $("#divSendMessage").hide();
-
-//var data = {
-//    title: "hello world",
-//    description: "this is hello world"
-//}
-
-//var homeViewModel = {
-//    title: ko.observable(data.title),
-//    description: ko.observable(data.description)
-//}
-
-//$(document).ready(function () {
-//    $.getJSON("api/data", function (result) {
-//        homeViewModel.title(result[0].Title);
-//        homeViewModel.description(result[0].Description);
-//    });
-
-//    ko.applyBindings(homeViewModel);
-    //});
 });
