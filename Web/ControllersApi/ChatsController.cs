@@ -30,7 +30,7 @@ namespace Web.ControllersApi
             if (user == null)
                 return JsonConvert.SerializeObject(new Chat[] { });
 
-            var chatUsers = _chatUserRepository.GetAllForUser(user.Guid);
+            var chatUsers = _chatUserRepository.GetAllByUserGuid(user.Guid);
             var chats = _chatRepository.GetByIds(chatUsers.Select(c => c.ChatGuid).ToArray());
             return JsonConvert.SerializeObject(chats);
         }

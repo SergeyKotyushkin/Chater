@@ -15,14 +15,10 @@ namespace Web.SignalR
     {
         public void Configuration(IAppBuilder app)
         {
-            GlobalHost.DependencyResolver.Register(typeof (ChatHub),
-                () =>
-                    new ChatHub(new UserRepository(), new ChatRepository(), new ChatUserRepository(),
-                        new MessageRepository()));
-            GlobalHost.DependencyResolver.Register(typeof(ChaterHub),
-                () =>
-                    new ChaterHub(new UserRepository(), new ChatRepository(), new ChatUserRepository(),
-                        new MessageRepository()));
+            GlobalHost.DependencyResolver.Register(typeof (ChaterHub),
+                () => new ChaterHub(
+                    new UserRepository(), new ChatRepository(), new ChatUserRepository(), new MessageRepository())
+                );
             app.MapSignalR();
         }
     }

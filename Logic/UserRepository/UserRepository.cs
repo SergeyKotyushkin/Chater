@@ -1,4 +1,4 @@
-﻿using System;
+﻿using System.Collections.Generic;
 using System.Linq;
 using Logic.Models;
 using Logic.UserRepository.Contracts;
@@ -8,18 +8,23 @@ namespace Logic.UserRepository
 {
     public class UserRepository : ElasticRepository.ElasticRepository, IUserRepository
     {
-        private const string EsIndex = "database";
         private const string EsType = "user";
 
-        private readonly User[] _users = {};
+        public static string EsIndex
+        {
+            get { return "database"; }
+        }
 
-        public User Add(string connectionId, string login, string password, string userName, bool isOnline)
+
+        public User Add(string login, string password, string userName)
         {
             try
             {
-                var user = new User(connectionId, login, password, userName, isOnline);
+                var user = new User(new HashSet<string>(), login, password, userName);
                 if (!CheckUser(user)) 
                     return null;
+
+                CreateIndex<User>(EsIndex);
 
                 var client = GetElasticClient();
                 client.Index(user, i => i.Index(EsIndex).Type(EsType).Id(user.Guid));
@@ -52,10 +57,17 @@ namespace Logic.UserRepository
                 var client = GetElasticClient();
                 var hits =
                     client.Search<User>(
-                        s => s.Query(q => q.Match(m => m.Field("login").Query(login)) &&
-                                          q.Match(m => m.Field("password").Query(password)) &&
-                                          q.Match(m => m.Field("isOnline").Query("false")))
-                              .Index(EsIndex).Type(EsType)).Hits;
+                        s =>
+                            s.Query(
+                                q =>
+                                    q.Bool(
+                                        b =>
+                                            b.Must(
+                                                m =>
+                                                    m.Term(fields => fields.Field(f => f.Login).Value(login)) &&
+                                                    m.Term(fields => fields.Field(f => f.Password).Value(password)))))
+                                .Index(EsIndex)
+                                .Type(EsType)).Hits;
 
                 var result = hits as IHit<User>[] ?? hits.ToArray();
                 return result.Count() == 1 ? result[0].Source : null;
@@ -66,14 +78,21 @@ namespace Logic.UserRepository
             }
         }
 
-        // no use
         public User Get(string guid)
         {
             try
             {
                 var client = GetElasticClient();
-                var hits = client.Search<User>(s => s.Query(q => q.Match(m => m.Field("guid").Query(guid)))
-                                                     .Index(EsIndex).Type(EsType)).Hits;
+                var hits = client.Search<User>(
+                    s =>
+                        s.Query(
+                            q =>
+                                q.Bool(
+                                    b =>
+                                        b.Must(
+                                            m =>
+                                                m.Term(fields => fields.Field(f => f.Guid).Value(guid)))))
+                            .Index(EsIndex).Type(EsType)).Hits;
 
                 var result = hits as IHit<User>[] ?? hits.ToArray();
                 return result.Count() == 1? result[0].Source: null;
@@ -91,8 +110,10 @@ namespace Logic.UserRepository
                 var client = GetElasticClient();
                 var hits =
                     client.Search<User>(
-                        s => s.Query(q => q.Match(m => m.Field("connectionId").Query(connectionId)))
-                              .Index(EsIndex).Type(EsType)).Hits;
+                        s =>
+                            s.Query(q => q.Match(m => m.Field(f => f.ConnectionIds).Query(connectionId)))
+                                .Index(EsIndex)
+                                .Type(EsType)).Hits;
 
                 var result = hits as IHit<User>[] ?? hits.ToArray();
                 return result.Count() == 1 ? result[0].Source : null;
@@ -108,8 +129,7 @@ namespace Logic.UserRepository
             try
             {
                 var client = GetElasticClient();
-                var hits =
-                    client.Search<User>(s => s.Index(EsIndex).Type(EsType)).Hits;
+                var hits = client.Search<User>(s => s.AllIndices().Index(EsIndex).Type(EsType)).Hits;
 
                 return hits.Select(hit => hit.Source).Where(s => s != null).ToArray();
             }
@@ -124,8 +144,16 @@ namespace Logic.UserRepository
             try
             {
                 var client = GetElasticClient();
-                var hits = client.Search<User>(s => s.Query(q => q.Match(m => m.Field("isOnline").Query("true")))
-                                                     .Index(EsIndex).Type(EsType)).Hits;
+                var hits = client.Search<User>(
+                        s =>
+                            s.Query(
+                                q =>
+                                    q.Bool(
+                                        b =>
+                                            b.Must(
+                                                m =>
+                                                    m.Term(fields => fields.Field(f => f.IsOnline).Value(true)))))
+                    .Index(EsIndex).Type(EsType)).Hits;
 
                 return hits.Select(hit => hit.Source).ToArray();
             }
@@ -150,7 +178,7 @@ namespace Logic.UserRepository
                 return null;
             }
         }
-
+        
 
         private bool CheckUser(User user)
         {
@@ -158,14 +186,18 @@ namespace Logic.UserRepository
             {
                 var client = GetElasticClient();
                 var hitsCount =
-                    client.Search<User>(s => s.Query(q => q.Match(m => m.Field("login").Query(user.Login)))
-                                              .Index(EsIndex).Type(EsType)).Hits.Count();
+                    client.Search<User>(
+                        s =>
+                            s.Query(
+                                q =>
+                                    q.Bool(
+                                        b =>
+                                            b.Should(
+                                                m => m.Term(t => t.Field(f => f.Login).Value(user.Login)),
+                                                m => m.Term(t => t.Field(f => f.UserName).Value(user.UserName)))))
+                                .Index(EsIndex)
+                                .Type(EsType)).Hits.Count();
 
-                if (hitsCount != 0) return false;
-
-                hitsCount =
-                    client.Search<User>(s => s.Query(q => q.Match(m => m.Field("username").Query(user.UserName)))
-                                              .Index(EsIndex).Type(EsType)).Hits.Count();
                 return hitsCount == 0;
             }
             catch

@@ -10,7 +10,7 @@ namespace Logic.ChatUserRepository.Contracts
 
         bool Remove(string guid);
 
-        ChatUser[] GetAllForUser(string userGuid);
+        ChatUser[] GetAllByUserGuid(string userGuid);
 
         ChatUser[] GetAllByChatGuid(string chatGuid);
     }

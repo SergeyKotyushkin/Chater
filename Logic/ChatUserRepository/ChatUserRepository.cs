@@ -6,8 +6,13 @@ namespace Logic.ChatUserRepository
 {
     public class ChatUserRepository : ElasticRepository.ElasticRepository, IChatUserRepository
     {
-        private const string EsIndex = "database";
         private const string EsType = "chatuser";
+
+        public static string EsIndex
+        {
+            get { return "database"; }
+        }
+
 
         public ChatUser Add(string chatGuid, string userGuid)
         {
@@ -16,6 +21,8 @@ namespace Logic.ChatUserRepository
                 var chatUser = new ChatUser(chatGuid, userGuid);
                 if (!CheckChatUser(chatUser))
                     return null;
+
+                CreateIndex<ChatUser>(EsIndex);
 
                 var client = GetElasticClient();
                 client.Index(chatUser, i => i.Index(EsIndex).Type(EsType).Id(chatUser.Guid));
@@ -41,21 +48,23 @@ namespace Logic.ChatUserRepository
             }
         }
 
-        public ChatUser[] GetAllForUser(string userGuid)
+        public ChatUser[] GetAllByUserGuid(string userGuid)
         {
             try
             {
                 var client = GetElasticClient();
                 var hits =
-                    client.Search<ChatUser>(s => s
-                        .Query(q => q.Match(m => m.Field("userGuid").Query(userGuid)))
-                        .Index(EsIndex).Type(EsType)).Hits;
+                    client.Search<ChatUser>(
+                        s =>
+                            s.Query(q => q.Term(t => t.Field(f => f.UserGuid).Value(userGuid)))
+                                .Index(EsIndex)
+                                .Type(EsType)).Hits;
 
                 return hits.Select(hit => hit.Source).ToArray();
             }
             catch
             {
-                return new ChatUser[]{};
+                return new ChatUser[] {};
             }
         }
 
@@ -65,15 +74,17 @@ namespace Logic.ChatUserRepository
             {
                 var client = GetElasticClient();
                 var hits =
-                    client.Search<ChatUser>(s => s
-                        .Query(q => q.Match(m => m.Field("chatGuid").Query(chatGuid)))
-                        .Index(EsIndex).Type(EsType)).Hits;
+                    client.Search<ChatUser>(
+                        s =>
+                            s.Query(q => q.Term(t => t.Field(f => f.ChatGuid).Value(chatGuid)))
+                                .Index(EsIndex)
+                                .Type(EsType)).Hits;
 
                 return hits.Select(hit => hit.Source).ToArray();
             }
             catch
             {
-                return new ChatUser[] { };
+                return new ChatUser[] {};
             }
         }
 
@@ -84,10 +95,17 @@ namespace Logic.ChatUserRepository
             {
                 var client = GetElasticClient();
                 var hitsCount =
-                    client.Search<ChatUser>(s => s
-                        .Query(q => q.Match(m => m.Field("chatGuid").Query(chatUser.ChatGuid)) && 
-                                    q.Match(m => m.Field("userGuid").Query(chatUser.UserGuid)))
-                        .Index(EsIndex).Type(EsType)).Hits.Count();
+                    client.Search<ChatUser>(
+                        s =>
+                            s.Query(
+                                q =>
+                                    q.Bool(
+                                        b =>
+                                            b.Must(
+                                                m => m.Term(t => t.Field(f => f.ChatGuid).Value(chatUser.ChatGuid)),
+                                                m => m.Term(t => t.Field(f => f.UserGuid).Value(chatUser.UserGuid)))))
+                                .Index(EsIndex)
+                                .Type(EsType)).Hits.Count();
 
                 return hitsCount == 0;
             }

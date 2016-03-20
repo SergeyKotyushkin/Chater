@@ -4,6 +4,7 @@ using System.Web.Http.Dependencies;
 using System.Web.Http.Dispatcher;
 using System.Web.Mvc;
 using System.Web.Routing;
+using Logic.ElasticRepository;
 using Logic.StructureMap;
 
 namespace Web
@@ -25,8 +26,10 @@ namespace Web
             container.Configure(x => x.For<IControllerActivator>().Use<StructureMapControllerActivator>());
 
             DependencyResolver.SetResolver(new StructureMapDependencyResolver(container));
-            HttpConfiguration config = GlobalConfiguration.Configuration;
+            var config = GlobalConfiguration.Configuration;
             config.Services.Replace(typeof (IHttpControllerActivator), new StructureMapWebApiActivator(config));
+
+            ElasticRepository.ElasticSearchCreateIndices();
         }
     }
 }

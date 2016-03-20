@@ -16,5 +16,10 @@ namespace Web.Controllers
         {
             return View("Chat");
         }
+
+        public ActionResult Chat()
+        {
+            return View();
+        }
     }
 }

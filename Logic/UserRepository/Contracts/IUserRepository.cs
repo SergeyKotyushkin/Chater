@@ -4,7 +4,7 @@ namespace Logic.UserRepository.Contracts
 {
     public interface IUserRepository
     {
-        User Add(string connectionId, string login, string password, string userName, bool isOnline);
+        User Add(string login, string password, string userName);
 
         User Update(User user);
 

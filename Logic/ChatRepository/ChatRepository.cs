@@ -7,8 +7,12 @@ namespace Logic.ChatRepository
 {
     public class ChatRepository : ElasticRepository.ElasticRepository, IChatRepository
     {
-        private const string EsIndex = "database";
         private const string EsType = "chat";
+
+        public static string EsIndex
+        {
+            get { return "database"; }
+        }
 
         public Chat Add(string name)
         {
@@ -17,6 +21,8 @@ namespace Logic.ChatRepository
                 var chat = new Chat(name);
                 if (!CheckChat(chat))
                     return null;
+
+                CreateIndex<Chat>(EsIndex);
 
                 var client = GetElasticClient();
                 client.Index(chat, i => i.Index(EsIndex).Type(EsType).Id(chat.Guid));
@@ -47,8 +53,10 @@ namespace Logic.ChatRepository
             try
             {
                 var client = GetElasticClient();
-                var hits = client.Search<Chat>(s => s.Query(q => q.Match(m => m.Field("guid").Query(guid)))
-                                                     .Index(EsIndex).Type(EsType)).Hits;
+                var hits =
+                    client.Search<Chat>(
+                        s => s.Query(q => q.Term(t => t.Field(f => f.Guid).Value(guid))).Index(EsIndex).Type(EsType))
+                        .Hits;
 
                 var result = hits as IHit<Chat>[] ?? hits.ToArray();
                 return result.Count() == 1? result[0].Source: null;
@@ -82,14 +90,17 @@ namespace Logic.ChatRepository
             {
                 var client = GetElasticClient();
                 var hitsCount =
-                    client.Search<User>(s => s.Query(q => q.Match(m => m.Field("Guid").Query(chat.Guid))))
+                    client.Search<Chat>(
+                        s =>
+                            s.Query(
+                                q =>
+                                    q.Bool(
+                                        b =>
+                                            b.Should(
+                                                sh => sh.Term(t => t.Field(f => f.Guid).Value(chat.Guid)),
+                                                sh => sh.Term(t => t.Field(f => f.Name).Value(chat.Name))))))
                         .Hits.Count();
 
-                if (hitsCount != 0) return false;
-
-                hitsCount =
-                    client.Search<User>(s => s.Query(q => q.Match(m => m.Field("Name").Query(chat.Name))))
-                        .Hits.Count();
                 return hitsCount == 0;
             }
             catch
