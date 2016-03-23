@@ -76,6 +76,8 @@
     <Compile Include="MessageRepository\MessageRepository.cs" />
     <Compile Include="Models\Chat.cs" />
     <Compile Include="Models\ChatUser.cs" />
+    <Compile Include="Models\ElasticResponse.cs" />
+    <Compile Include="Models\ElasticResult.cs" />
     <Compile Include="Models\Message.cs" />
     <Compile Include="Models\MessageOutput.cs" />
     <Compile Include="Models\User.cs" />

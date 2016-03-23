@@ -1,9 +1,8 @@
 ﻿using System.Linq;
 using System.Web.Http;
-using Logic.ChatRepository.Contracts;
+using Logic.ElasticRepository.Contracts;
 using Logic.MessageRepository.Contracts;
 using Logic.Models;
-using Logic.UserRepository.Contracts;
 using Newtonsoft.Json;
 
 namespace Web.ControllersApi

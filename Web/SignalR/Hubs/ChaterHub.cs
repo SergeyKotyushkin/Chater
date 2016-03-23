@@ -31,10 +31,10 @@ namespace Web.SignalR.Hubs
         // Registration: Register User
         public void Register(string login, string password, string userName)
         {
-            var user = _userRepository.Add(login, password, userName);
+            var addResult = _userRepository.Add(login, password, userName);
 
-            var result = user != null;
-            Clients.Caller.OnRegister(result, result ? "Success Register" : "Login Or UserName are not unique!");
+            var result = addResult.Success;
+            Clients.Caller.OnRegister(result, addResult.Message);
         }
 
         // Login: User

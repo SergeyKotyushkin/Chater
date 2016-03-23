@@ -1,9 +1,10 @@
-﻿using Nest;
+﻿using Logic.Contracts;
+using Nest;
 
 namespace Logic.Models
 {
     [ElasticsearchType]
-    public class Chat
+    public class Chat : IGuidedEntity
     {
         public Chat(string name)
         {

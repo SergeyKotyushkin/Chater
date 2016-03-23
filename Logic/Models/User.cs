@@ -2,12 +2,12 @@
 using System.Linq;
 using Nest;
 using Newtonsoft.Json;
-using Elasticsearch;
+using Logic.Contracts;
 
 namespace Logic.Models
 {
     [ElasticsearchType]
-    public class User
+    public class User : IGuidedEntity
     {
         // Constructors
         [JsonConstructor]

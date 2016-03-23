@@ -21,11 +21,11 @@
         <div id="divChats" class="col-md-3" style="height: 100%; background-color: #f0ffff; border: 1px solid #008b8b; display: flex; flex-direction: column;">
             <div style="flex-grow: 1; border: 1px solid #191970;">
                 <h4>Chats</h4>
-                <ul data-bind="foreach: chats.slice(0).sort(function(a,b){return a.name.localeCompare(b.name)})">
-                    <li>
-                        <span data-bind="text: name, attr: { 'data-guid': guid }"></span>
-                    </li>
-                </ul>
+                <div data-bind="foreach: chats.slice(0).sort(function(a,b){return a.name.localeCompare(b.name)})">
+                    <div>
+                        <div class="col-md-6 float-left" data-bind="text: name, attr: { 'data-guid': guid }"></div>
+                    </div>
+                </div>
             </div>
             <div id="divNewChatButton" class="text-center" style="border: 1px solid #191970; padding: 10px;">
                 <a id="btnNewChatOpen" class="btn btn-info">Create new chat</a>

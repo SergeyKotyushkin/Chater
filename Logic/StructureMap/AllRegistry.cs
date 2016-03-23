@@ -1,4 +1,5 @@
-﻿using Logic.UserRepository.Contracts;
+﻿using Logic.ElasticRepository;
+using Logic.ElasticRepository.Contracts;
 using Security.Contracts;
 using StructureMap;
 using StructureMap.Graph;
@@ -16,7 +17,7 @@ namespace Logic.StructureMap
             });
 
             For<ISecurity>().Use<Security.Security>();
-            For<IUserRepository>().Use<UserRepository.UserRepository>();
+            For<IUserRepository>().Use<UserRepository>();
         }
     }
 }

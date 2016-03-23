@@ -1,7 +1,5 @@
-﻿using Logic.ChatRepository;
-using Logic.ChatUserRepository;
+﻿using Logic.ElasticRepository;
 using Logic.MessageRepository;
-using Logic.UserRepository;
 using Microsoft.AspNet.SignalR;
 using Microsoft.Owin;
 using Owin;

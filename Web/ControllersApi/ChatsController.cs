@@ -1,10 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Web.Http;
-using Logic.ChatRepository.Contracts;
-using Logic.ChatUserRepository.Contracts;
+using Logic.ElasticRepository.Contracts;
 using Logic.Models;
-using Logic.UserRepository.Contracts;
 using Newtonsoft.Json;
 
 namespace Web.ControllersApi
@@ -31,7 +29,7 @@ namespace Web.ControllersApi
                 return JsonConvert.SerializeObject(new Chat[] { });
 
             var chatUsers = _chatUserRepository.GetAllByUserGuid(user.Guid);
-            var chats = _chatRepository.GetByIds(chatUsers.Select(c => c.ChatGuid).ToArray());
+            var chats = _chatRepository.GetByGuds(chatUsers.Select(c => c.ChatGuid).ToArray());
             return JsonConvert.SerializeObject(chats);
         }
     }

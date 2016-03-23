@@ -1,6 +1,6 @@
 ﻿using System.Net.Http;
 using System.Web.Http;
-using Logic.ChatUserRepository.Contracts;
+using Logic.ElasticRepository.Contracts;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
