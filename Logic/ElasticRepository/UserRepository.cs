@@ -26,8 +26,7 @@ namespace Logic.ElasticRepository
         // Updating User
         public ElasticResult Update(User user)
         {
-            var indexDescriptor = new IndexDescriptor<User>(_elasticRepository.EsIndex, EsType).Id(user.Guid);
-            var response = _elasticRepository.ExecuteCreateOrUpdateRequest(user, indexDescriptor);
+            var response = _elasticRepository.ExecuteCreateOrUpdateRequest(user, EsType);
 
             return response.Success
                 ? new ElasticResult(true, "Success Updating", user)

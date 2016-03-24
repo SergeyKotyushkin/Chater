@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
+using Logic.Contracts;
 using Logic.ElasticRepository.Contracts;
 using Logic.Models;
 using Nest;
@@ -43,18 +45,15 @@ namespace Logic.ElasticRepository
         }
 
         // Creting or Updating entity at the Elasticsearch database
-        public ElasticResponse ExecuteCreateOrUpdateRequest<T>(T @object, IndexDescriptor<T> indexDescriptor) where T : class
+        public ElasticResponse ExecuteCreateOrUpdateRequest<T>(T @object, string esType) where T : class, IGuidedEntity
         {
             try
             {
                 var client = GetElasticClient();
-                var response = client.Index(@object, i => indexDescriptor);
-
-                if (response.Created)
-                    return new ElasticResponse(true, true);
+                var response = client.Index(@object, i => i.Index(EsIndex).Type(esType).Id(@object.Guid));
 
                 return response.ApiCall.Success
-                    ? new ElasticResponse(false, "Error on creating/updating occured")
+                    ? new ElasticResponse(true, true)
                     : new ElasticResponse(false,
                         "Request ended with error. " + response.ApiCall.OriginalException.Message);
             }
@@ -114,7 +113,7 @@ namespace Logic.ElasticRepository
                 if (isIndexExist)
                     return new ElasticResult(true, true);
 
-                client.CreateIndex(EsIndexName,
+                var response = client.CreateIndex(EsIndexName,
                     i =>
                         i.Mappings(
                             m => m

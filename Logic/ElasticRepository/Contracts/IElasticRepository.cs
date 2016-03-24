@@ -1,4 +1,5 @@
-﻿using Logic.Models;
+﻿using Logic.Contracts;
+using Logic.Models;
 using Nest;
 
 namespace Logic.ElasticRepository.Contracts
@@ -9,7 +10,7 @@ namespace Logic.ElasticRepository.Contracts
 
         ElasticResponse ExecuteSearchRequest<T>(SearchDescriptor<T> searchDescriptor) where T : class;
 
-        ElasticResponse ExecuteCreateOrUpdateRequest<T>(T @object, IndexDescriptor<T> indexDescriptor) where T : class;
+        ElasticResponse ExecuteCreateOrUpdateRequest<T>(T @object, string esType) where T : class, IGuidedEntity;
 
         ElasticResponse ExecuteMultiGetRequest(MultiGetDescriptor multiGetDescriptor);
 

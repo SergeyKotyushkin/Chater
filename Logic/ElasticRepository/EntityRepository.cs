@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using Logic.Contracts;
 using Logic.ElasticRepository.Contracts;
 using Logic.Models;
@@ -14,8 +15,7 @@ namespace Logic.ElasticRepository
         // Creating Entity for Type
         public ElasticResult Add<T>(string esType, T @object) where T : class, IGuidedEntity
         {
-            var indexDescriptor = new IndexDescriptor<T>(_elasticRepository.EsIndex, esType).Id(@object.Guid);
-            var response = _elasticRepository.ExecuteCreateOrUpdateRequest(@object, indexDescriptor);
+            var response = _elasticRepository.ExecuteCreateOrUpdateRequest(@object, esType);
 
             return response.Success
                 ? new ElasticResult(true, "Success Added", @object)
@@ -36,7 +36,11 @@ namespace Logic.ElasticRepository
         // Getting all Entities for Type by Guids
         public ElasticResult GetByGuids<T>(string esType, params string[] guids) where T : class
         {
-            var multiGetDescriptor = new MultiGetDescriptor().GetMany<T>(guids).Index(_elasticRepository.EsIndex).Type(esType);
+            if (guids.Length == 0)
+                return new ElasticResult(true, new T[] {});
+
+            var multiGetDescriptor =
+                new MultiGetDescriptor().GetMany<T>(guids).Index(_elasticRepository.EsIndex).Type(esType);
 
             var response = _elasticRepository.ExecuteMultiGetRequest(multiGetDescriptor);
 
@@ -82,9 +86,9 @@ namespace Logic.ElasticRepository
 
             // If found other than 1 user
             if (response.Success && hitsArray.Count() != 1)
-                return new ElasticResult(true, response.Message);
+                return new ElasticResult(false, null);
 
-            return new ElasticResult(true, hitsArray.ElementAt(0));
+            return new ElasticResult(true, hitsArray.ElementAt(0).Source);
         }
 
         // Taking all Entities from the Elastic Response

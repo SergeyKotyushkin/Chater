@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using Nest;
 using Newtonsoft.Json;
@@ -45,7 +46,7 @@ namespace Logic.Models
 
         [String(Index = FieldIndexOption.NotAnalyzed)]
         public HashSet<string> ConnectionIds { get; set; }
-
+        
         [String(Index = FieldIndexOption.NotAnalyzed)]
         public string Login { get; set; }
 
@@ -55,7 +56,7 @@ namespace Logic.Models
         [String(Index = FieldIndexOption.NotAnalyzed)]
         public string UserName { get; set; }
 
-        [String(Index = FieldIndexOption.NotAnalyzed)]
+        [Boolean]
         public bool IsOnline
         {
             get

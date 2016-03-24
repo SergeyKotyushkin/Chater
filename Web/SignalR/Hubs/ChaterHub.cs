@@ -41,7 +41,7 @@ namespace Web.SignalR.Hubs
             var elasticResult = _userRepository.Login(login, password);
             if (!elasticResult.Success)
             {
-                Clients.Caller.OnLoginCaller(null, null, false, elasticResult.Message);
+                Clients.Caller.OnLoginCaller(null, null, false, elasticResult.Message ?? "Invalid account data");
                 return;
             }
 
@@ -137,6 +137,9 @@ namespace Web.SignalR.Hubs
 
             var user = (User) elasticResult.Value;
             // TODO: remove from groups
+
+            if(user == null)
+                return;
 
             user.ConnectionIds.Remove(Context.ConnectionId);
 

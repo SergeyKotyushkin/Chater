@@ -75,11 +75,11 @@
     // Registration: On Result
     chater.client.onRegister = function (result, message) {
         var divAlert = $("#divRegistrationAlert");
-        divAlert.removeClass("hidden");
         divAlert.html(message);
         divAlert.removeClass("alert-success");
         divAlert.removeClass("alert-danger");
         divAlert.addClass(result ? "alert-success" : "alert-danger");
+        divAlert.removeClass("hidden");
     };
 
 
@@ -146,6 +146,7 @@
             $("#tbRegistrationUserName").val("");
             $("#divLogin").removeClass("hidden");
             $("#divRegistration").addClass("hidden");
+            $("#divRegistrationAlert").addClass("hidden");
         });
 
         // Registration: Register button Click
@@ -153,6 +154,17 @@
             var login = $("#tbRegistrationLogin").val(),
                 password = $("#tbRegistrationPassword").val(),
                 userName = $("#tbRegistrationUserName").val();
+
+            var divAlert = $("#divRegistrationAlert");
+            if (!login.length || !password.length || !userName.length) {
+                divAlert.html("Fields must be filled!");
+                divAlert.removeClass("alert-success");
+                divAlert.addClass("alert-danger");
+                divAlert.removeClass("hidden");
+                return;
+            }
+            
+            divAlert.addClass("hidden");
             chater.server.register(login, password, userName);
         });
 
