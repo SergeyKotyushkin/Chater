@@ -4,8 +4,8 @@ namespace Logic.MessageRepository.Contracts
 {
     public interface IMessageRepository
     {
-        Message Add(string chatGuid, string userGuid, string text);
+        ElasticResult Add(string chatGuid, string userGuid, string text);
 
-        Message[] GetByChatId(string guid);
+        ElasticResult GetByChatId(string guid);
     }
 }

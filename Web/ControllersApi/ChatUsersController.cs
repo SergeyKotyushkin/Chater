@@ -18,7 +18,7 @@ namespace Web.ControllersApi
         // GET api/chatusers/5
         public string Get(string id)
         {
-            var chatUsers = _chatUserRepository.GetAllByChatGuid(id);
+            var chatUsers = _chatUserRepository.GetUsersForChatByChatGuid(id);
             
             return JsonConvert.SerializeObject(chatUsers);
         }

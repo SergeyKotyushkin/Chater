@@ -66,12 +66,15 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ChatRepository\ChatRepository.cs" />
-    <Compile Include="ChatRepository\Contracts\IChatRepository.cs" />
-    <Compile Include="ChatUserRepository\ChatUserRepository.cs" />
-    <Compile Include="ChatUserRepository\Contracts\IChatUserRepository.cs" />
+    <Compile Include="Contracts\IGuidedEntity.cs" />
+    <Compile Include="ElasticRepository\ChatRepository.cs" />
+    <Compile Include="ElasticRepository\Contracts\IChatRepository.cs" />
+    <Compile Include="ElasticRepository\ChatUserRepository.cs" />
+    <Compile Include="ElasticRepository\Contracts\IChatUserRepository.cs" />
     <Compile Include="ElasticRepository\Contracts\IElasticRepository.cs" />
+    <Compile Include="ElasticRepository\Contracts\IEntityRepository.cs" />
     <Compile Include="ElasticRepository\ElasticRepository.cs" />
+    <Compile Include="ElasticRepository\EntityRepository.cs" />
     <Compile Include="MessageRepository\Contracts\IMessageRepository.cs" />
     <Compile Include="MessageRepository\MessageRepository.cs" />
     <Compile Include="Models\Chat.cs" />
@@ -86,8 +89,8 @@
     <Compile Include="StructureMap\StructureMapControllerActivator.cs" />
     <Compile Include="StructureMap\StructureMapDependencyResolver.cs" />
     <Compile Include="StructureMap\StructureMapFactory.cs" />
-    <Compile Include="UserRepository\Contracts\IUserRepository.cs" />
-    <Compile Include="UserRepository\UserRepository.cs" />
+    <Compile Include="ElasticRepository\Contracts\IUserRepository.cs" />
+    <Compile Include="ElasticRepository\UserRepository.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

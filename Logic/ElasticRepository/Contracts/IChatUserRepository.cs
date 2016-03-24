@@ -10,6 +10,6 @@ namespace Logic.ElasticRepository.Contracts
 
         ElasticResult GetAllByUserGuid(string userGuid);
 
-        ElasticResult GetAllByChatGuid(string chatGuid);
+        ElasticResult GetUsersForChatByChatGuid(string chatGuid);
     }
 }

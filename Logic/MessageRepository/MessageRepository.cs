@@ -1,46 +1,33 @@
-﻿using System.Linq;
+﻿using Logic.ElasticRepository.Contracts;
 using Logic.MessageRepository.Contracts;
 using Logic.Models;
+using Logic.StructureMap;
+using Nest;
 
 namespace Logic.MessageRepository
 {
-    public class MessageRepository : ElasticRepository.ElasticRepository, IMessageRepository
+    public class MessageRepository : IMessageRepository
     {
-        private const string EsIndex = "database";
+        private readonly IElasticRepository _elasticRepository = StructureMapFactory.Resolve<IElasticRepository>();
+        private readonly IEntityRepository _entityRepository = StructureMapFactory.Resolve<IEntityRepository>();
+
         private const string EsType = "message";
 
-        public Message Add(string chatGuid, string userGuid, string text)
+        public ElasticResult Add(string chatGuid, string userGuid, string text)
         {
-            try
-            {
-                var message = new Message(chatGuid, userGuid, text);
+            var message = new Message(chatGuid, userGuid, text);
 
-                var client = GetElasticClient();
-                client.Index(message, i => i.Index(EsIndex).Type(EsType).Id(message.Guid));
-                return message;
-            }
-            catch
-            {
-                return null;
-            }
+            return _entityRepository.Add(EsType, message);
         }
 
-        public Message[] GetByChatId(string guid)
+        public ElasticResult GetByChatId(string guid)
         {
-            try
-            {
-                var client = GetElasticClient();
-                var hits =
-                    client.Search<Message>(
-                        s => s.Query(q => q.Match(m => m.Field("chatGuid").Query(guid)))
-                              .Index(EsIndex).Type(EsType)).Hits;
+            var searchDescriptor = new SearchDescriptor<Message>().Query(
+                q => q.Term(t => t.Field(f => f.ChatGuid).Value(guid))).Index(_elasticRepository.EsIndex).Type(EsType);
 
-                return hits.Select(m => m.Source).ToArray();
-            }
-            catch
-            {
-                return null;
-            }
+            var response = _elasticRepository.ExecuteSearchRequest(searchDescriptor);
+
+            return _entityRepository.GetEntitiesFromElasticResponse<Message>(response);
         }
     }
 }

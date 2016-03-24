@@ -50,7 +50,7 @@ namespace Logic.ElasticRepository
 
             var response = _elasticRepository.ExecuteSearchRequest(searchDescriptor);
 
-            return _elasticRepository.GetUserIfOnlyOneUserInElasticResponse<User>(response);
+            return _entityRepository.GetEntityIfOnlyOneEntityInElasticResponse<User>(response);
         }
 
         // Getting User by Guid
@@ -67,7 +67,7 @@ namespace Logic.ElasticRepository
 
             var response = _elasticRepository.ExecuteSearchRequest(searchDescriptor);
 
-            return _elasticRepository.GetUserIfOnlyOneUserInElasticResponse<User>(response);
+            return _entityRepository.GetEntityIfOnlyOneEntityInElasticResponse<User>(response);
         }
 
         // Getting all Users
@@ -84,7 +84,7 @@ namespace Logic.ElasticRepository
 
             var response = _elasticRepository.ExecuteSearchRequest(searchDescriptor);
 
-            return _elasticRepository.GetUsersFromElasticResponse<User>(response);
+            return _entityRepository.GetEntitiesFromElasticResponse<User>(response);
         }
 
         // Getting Users by Guids

@@ -29,6 +29,15 @@ namespace Logic.Models
             UserName = userName;
         }
 
+        public User(User user)
+        {
+            Guid = user.Guid;
+            ConnectionIds = user.ConnectionIds;
+            Login = user.Login;
+            Password = user.Password;
+            UserName = user.UserName;
+        }
+
 
         // Properties
         [String(Index = FieldIndexOption.NotAnalyzed)]

@@ -14,9 +14,5 @@ namespace Logic.ElasticRepository.Contracts
         ElasticResponse ExecuteMultiGetRequest(MultiGetDescriptor multiGetDescriptor);
 
         ElasticResponse ExecuteDeleteRequest<T>(DocumentPath<T> documentPath) where T : class;
-
-        ElasticResult GetUserIfOnlyOneUserInElasticResponse<T>(ElasticResponse response) where T : class;
-
-        ElasticResult GetUsersFromElasticResponse<T>(ElasticResponse response) where T : class;
     }
 }

@@ -41,7 +41,7 @@ namespace Logic.ElasticRepository
         }
 
         // Getting Chats by Guids
-        public ElasticResult GetByGuds(params string[] chatGuids)
+        public ElasticResult GetByGuids(params string[] chatGuids)
         {
             return _entityRepository.GetByGuids<Chat>(EsType, chatGuids);
         }

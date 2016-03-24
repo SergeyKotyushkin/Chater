@@ -14,5 +14,9 @@ namespace Logic.ElasticRepository.Contracts
         ElasticResult GetAll<T>(string esType) where T : class;
 
         ElasticResult Remove<T>(string esType, string guid) where T : class;
+
+        ElasticResult GetEntityIfOnlyOneEntityInElasticResponse<T>(ElasticResponse response) where T : class;
+
+        ElasticResult GetEntitiesFromElasticResponse<T>(ElasticResponse response) where T : class;
     }
 }

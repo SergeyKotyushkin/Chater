@@ -1,10 +1,8 @@
 ﻿using System.Linq;
 using System.Threading.Tasks;
-using Logic.ChatRepository.Contracts;
-using Logic.ChatUserRepository.Contracts;
+using Logic.ElasticRepository.Contracts;
 using Logic.MessageRepository.Contracts;
 using Logic.Models;
-using Logic.UserRepository.Contracts;
 using Microsoft.AspNet.SignalR;
 using Newtonsoft.Json;
 
@@ -40,30 +38,56 @@ namespace Web.SignalR.Hubs
         // Login: User
         public void Login(string login, string password)
         {
-            var user = _userRepository.Login(login, password);
-            if (user == null)
+            var elasticResult = _userRepository.Login(login, password);
+            if (!elasticResult.Success)
             {
-                Clients.Caller.OnLoginCaller(null, null, false, "Connection error or invalid user info");
+                Clients.Caller.OnLoginCaller(null, null, false, elasticResult.Message);
                 return;
             }
+
+            var user = (User) elasticResult.Value;
 
             // TODO: update groups
             //UpdateUserChats(user.ConnectionId, Context.ConnectionId);
 
             user.ConnectionIds.Add(Context.ConnectionId);
-            user = _userRepository.Update(user);
-            if (user == null)
+            elasticResult = _userRepository.Update(user);
+            if (!elasticResult.Success)
             {
-                Clients.Caller.OnLoginCaller(null, null, false, ConnectionErrorMessage);
+                Clients.Caller.OnLoginCaller(null, null, false, elasticResult.Message);
                 return;
             }
 
-            var users = _userRepository.GetAll().Where(u => u.Guid != user.Guid);
+            elasticResult = _userRepository.GetAll();
+            if (!elasticResult.Success)
+            {
+                Clients.Caller.OnLoginCaller(null, null, false, elasticResult.Message);
+                return;
+            }
+
+            var users = ((User[]) elasticResult.Value).Where(u => u.Guid != user.Guid);
             var connectionIds = User.GetConnectionIds(users);
             var jsonUsers = JsonConvert.SerializeObject(users);
 
-            var chatGuids = _chatUserRepository.GetAllByUserGuid(user.Guid).Select(c => c.ChatGuid).ToArray();
-            var chats = _chatRepository.GetByIds(chatGuids);
+
+            elasticResult = _chatUserRepository.GetAllByUserGuid(user.Guid);
+            if (!elasticResult.Success)
+            {
+                Clients.Caller.OnLoginCaller(null, null, false, elasticResult.Message);
+                return;
+            }
+
+            var chatGuids = ((ChatUser[]) elasticResult.Value).Select(c => c.ChatGuid).ToArray();
+
+            elasticResult = _chatRepository.GetByGuids(chatGuids);
+            if (!elasticResult.Success)
+            {
+                Clients.Caller.OnLoginCaller(null, null, false, elasticResult.Message);
+                return;
+            }
+
+            var chats = (Chat[]) elasticResult.Value;
+
             var jsonChats = JsonConvert.SerializeObject(chats);
 
             Clients.Caller.OnLoginCaller(jsonUsers, jsonChats, true, null);
@@ -73,25 +97,28 @@ namespace Web.SignalR.Hubs
         //Chat: Create new chat
         public void CreateChat(string name)
         {
-            var user = _userRepository.GetByConnectionId(Context.ConnectionId);
-            if (user == null)
+            var elasticResult = _userRepository.GetByConnectionId(Context.ConnectionId);
+            if (!elasticResult.Success)
             {
-                Clients.Caller.OnCreateChat(false, null, null, ConnectionErrorMessage);
+                Clients.Caller.OnCreateChat(false, null, null, elasticResult.Message);
                 return;
             }
 
-            var chat = _chatRepository.Add(name);
-            if (chat == null)
+            var user = (User) elasticResult.Value;
+
+            elasticResult = _chatRepository.Add(name);
+            if (!elasticResult.Success)
             {
-                Clients.Caller.OnCreateChat(false, null, null, ConnectionErrorMessage);
+                Clients.Caller.OnCreateChat(false, null, null, elasticResult.Message);
                 return;
             }
 
-            var chatUser = _chatUserRepository.Add(chat.Guid, user.Guid);
-            if (chatUser == null)
+            var chat = (Chat)elasticResult.Value;
+
+            elasticResult = _chatUserRepository.Add(chat.Guid, user.Guid);
+            if (!elasticResult.Success)
             {
-                _chatRepository.Remove(chat.Guid);
-                Clients.Caller.OnCreateChat(false, null, null, ConnectionErrorMessage);
+                Clients.Caller.OnCreateChat(false, null, null, elasticResult.Message);
                 return;
             }
 
@@ -104,14 +131,22 @@ namespace Web.SignalR.Hubs
         // Disconnect
         public void Disconnect()
         {
-            var user = _userRepository.GetByConnectionId(Context.ConnectionId);
-            if (user == null) return;
+            var elasticResult = _userRepository.GetByConnectionId(Context.ConnectionId);
+            if (!elasticResult.Success)
+                return;
 
-
+            var user = (User) elasticResult.Value;
             // TODO: remove from groups
 
             user.ConnectionIds.Remove(Context.ConnectionId);
-            user = _userRepository.Update(user);
+
+            elasticResult = _userRepository.Update(user);
+            if (!elasticResult.Success)
+            {
+                Clients.Caller.OnLoginCaller(null, null, false, elasticResult.Message);
+                return;
+            }
+
             if (!user.IsOnline)
                 Clients.Others.OnDisconnectOthers(user.Guid);
             Clients.Caller.OnDisconnectCaller(user.UserName);

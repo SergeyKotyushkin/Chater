@@ -1,10 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net;
-using System.Net.Http;
+﻿using System.Linq;
 using System.Web.Http;
 using Logic.ElasticRepository.Contracts;
+using Logic.Models;
 using Newtonsoft.Json;
 
 namespace Web.ControllersApi
@@ -21,8 +18,11 @@ namespace Web.ControllersApi
         // GET api/users
         public string Get()
         {
-            var users = _userRepository.GetAll();
+            var elasticResult = _userRepository.GetAll();
+            if(!elasticResult.Success)
+                return JsonConvert.SerializeObject(new User[] { });
 
+            var users = (User[]) elasticResult.Value;
             return JsonConvert.SerializeObject(users.OrderBy(u => u.UserName));
         }
     }

@@ -24,17 +24,22 @@ namespace Web.ControllersApi
         // GET api/messages/5
         public string Get(string id)
         {
-            var chat = _chatRepository.Get(id);
-            if (chat == null)
+            var elasticResult = _chatRepository.Get(id);
+            if (!elasticResult.Success)
                 return null;
 
-            var messages = _messageRepository.GetByChatId(id).OrderBy(m => m.SendTime).ToArray();
-            if (messages.Length == 0)
+
+            elasticResult = _messageRepository.GetByChatId(id);
+            if (!elasticResult.Success)
                 return null;
 
-            var users = _userRepository.GetByGuids(messages.Select(m => m.UserGuid).Distinct().ToArray());
-            if (users == null)
+            var messages = ((Message[]) elasticResult.Value).OrderBy(m => m.SendTime).ToArray();
+
+            elasticResult = _userRepository.GetByGuids(messages.Select(m => m.UserGuid).Distinct().ToArray());
+            if (!elasticResult.Success)
                 return null;
+
+            var users = (User[]) elasticResult.Value;
 
             var messageOutput = new MessageOutput[messages.Length];
             for (var i = 0; i < messages.Length; i++)

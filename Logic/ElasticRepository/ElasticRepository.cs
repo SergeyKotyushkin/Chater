@@ -101,46 +101,8 @@ namespace Logic.ElasticRepository
             }
         }
 
-        // Take from the Elastic Response an User if this is only one there
-        public ElasticResult GetUserIfOnlyOneUserInElasticResponse<T>(ElasticResponse response) where T : class
-        {
-            // If request bad executed.
-            if (!response.Success)
-                return new ElasticResult(false, response.Message);
-
-            var hits = ((ISearchResponse<T>)response.Response).Hits;
-            var hitsArray = hits as IHit<T>[] ?? hits.ToArray();
-
-            // If found other than 1 user
-            if (response.Success && hitsArray.Count() != 1)
-                return new ElasticResult(true, response.Message);
-
-            return new ElasticResult(true, hitsArray.ElementAt(0));
-        }
-
-        // Take all users from the Elastic Response
-        public ElasticResult GetUsersFromElasticResponse<T>(ElasticResponse response) where T : class
-        {
-            // If request bad executed.
-            if (!response.Success)
-                return new ElasticResult(false, response.Message);
-
-            return new ElasticResult(true,
-                ((ISearchResponse<T>)response.Response).Hits.Select(h => h.Source).Where(s => s != null).ToArray());
-        }
 
         /* Public Static Methods */
-        // Getting Elasting Client TODO: make private
-        public static ElasticClient GetElasticClient()
-        {
-            var node = new Uri(EsUri);
-
-            var settings = new ConnectionSettings(node);
-            settings.RequestTimeout(TimeSpan.FromSeconds(3));
-
-            return new ElasticClient(settings);
-        }
-
         // Creating Index
         public static ElasticResult ElasticSearchCreateIndices()
         {
@@ -168,5 +130,17 @@ namespace Logic.ElasticRepository
             }
         }
 
+
+        /* Private Static Methods */
+        // Getting Elasting Client
+        private static ElasticClient GetElasticClient()
+        {
+            var node = new Uri(EsUri);
+
+            var settings = new ConnectionSettings(node);
+            settings.RequestTimeout(TimeSpan.FromSeconds(3));
+
+            return new ElasticClient(settings);
+        }
     }
 }

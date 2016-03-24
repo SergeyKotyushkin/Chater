@@ -24,12 +24,23 @@ namespace Web.ControllersApi
         // GET api/chats/5
         public string Get(string id)
         {
-            var user = _userRepository.GetByConnectionId(id);
-            if (user == null)
-                return JsonConvert.SerializeObject(new Chat[] { });
+            var elasticResult = _userRepository.GetByConnectionId(id);
+            if (!elasticResult.Success)
+                return JsonConvert.SerializeObject(new Chat[] {});
 
-            var chatUsers = _chatUserRepository.GetAllByUserGuid(user.Guid);
-            var chats = _chatRepository.GetByGuds(chatUsers.Select(c => c.ChatGuid).ToArray());
+            var user = (User) elasticResult.Value;
+
+            elasticResult = _chatUserRepository.GetAllByUserGuid(user.Guid);
+            if (!elasticResult.Success)
+                return JsonConvert.SerializeObject(new Chat[] {});
+
+            var chatUsers = (ChatUser[]) elasticResult.Value;
+
+            elasticResult = _chatRepository.GetByGuids(chatUsers.Select(c => c.ChatGuid).ToArray());
+            if (!elasticResult.Success)
+                return JsonConvert.SerializeObject(new Chat[] {});
+
+            var chats = (Chat[]) elasticResult.Value;
             return JsonConvert.SerializeObject(chats);
         }
     }

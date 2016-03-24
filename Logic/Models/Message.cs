@@ -1,8 +1,9 @@
 ﻿using System;
+using Logic.Contracts;
 
 namespace Logic.Models
 {
-    public class Message
+    public class Message : IGuidedEntity
     {
         public Message(string chatGuid, string userGuid, string text)
         {
