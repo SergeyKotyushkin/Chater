@@ -23,6 +23,16 @@ namespace Logic.ElasticRepository
             return !response.Success ? response : _entityRepository.Add(EsType, chat);
         }
 
+        // Updating Chat
+        public ElasticResult Update(Chat chat)
+        {
+            var response = _elasticRepository.ExecuteCreateOrUpdateRequest(chat, EsType);
+
+            return response.Success
+                ? new ElasticResult(true, "Success Updating", chat)
+                : new ElasticResult(false, response.Message);
+        }
+
         // Removing the Chat
         public ElasticResult Remove(string guid)
         {

@@ -6,6 +6,8 @@ namespace Logic.ElasticRepository.Contracts
     {
         ElasticResult Add(string name);
 
+        ElasticResult Update(Chat chat);
+
         ElasticResult Remove(string guid);
 
         ElasticResult Get(string guid);

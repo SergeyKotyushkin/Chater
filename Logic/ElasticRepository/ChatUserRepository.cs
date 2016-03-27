@@ -39,15 +39,15 @@ namespace Logic.ElasticRepository
             return _entityRepository.GetEntitiesFromElasticResponse<ChatUser>(response);
         }
 
-        // Getting Users by ChatGuid
-        public ElasticResult GetUsersForChatByChatGuid(string chatGuid)
+        // Getting ChatUsers by ChatGuid
+        public ElasticResult GetByChatGuid(string chatGuid)
         {
             var searchDescriptor = new SearchDescriptor<ChatUser>().Query(
                 q => q.Term(t => t.Field(f => f.ChatGuid).Value(chatGuid))).Index(_elasticRepository.EsIndex).Type(EsType);
 
             var response = _elasticRepository.ExecuteSearchRequest(searchDescriptor);
 
-            return _entityRepository.GetEntitiesFromElasticResponse<User>(response);
+            return _entityRepository.GetEntitiesFromElasticResponse<ChatUser>(response);
         }
 
         // Check Is ChatUser Unique

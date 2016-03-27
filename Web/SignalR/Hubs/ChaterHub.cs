@@ -10,8 +10,6 @@ namespace Web.SignalR.Hubs
 {
     public class ChaterHub : Hub
     {
-        private const string ConnectionErrorMessage = "Connection error";
-
         private readonly IUserRepository _userRepository;
         private readonly IChatRepository _chatRepository;
         private readonly IChatUserRepository _chatUserRepository;
@@ -94,7 +92,7 @@ namespace Web.SignalR.Hubs
             Clients.Clients(connectionIds).OnLoginOthers(user.Guid, user.UserName, user.IsOnline);
         }
 
-        //Chat: Create new chat
+        // Chat: Create new chat
         public void CreateChat(string name)
         {
             var elasticResult = _userRepository.GetByConnectionId(Context.ConnectionId);
@@ -128,6 +126,154 @@ namespace Web.SignalR.Hubs
             Clients.Caller.OnCreateChat(true, name, chat.Guid, null);
         }
 
+        // Chat: Remove chat
+        public void RemoveChat(string guid)
+        {
+            var elasticResult = _userRepository.GetByConnectionId(Context.ConnectionId);
+            if (!elasticResult.Success)
+            {
+                Clients.Caller.OnRemoveChat(false, elasticResult.Message);
+                return;
+            }
+
+            var user = (User)elasticResult.Value;
+            
+            elasticResult = _chatUserRepository.GetByChatGuid(guid);
+            if (!elasticResult.Success)
+            {
+                Clients.Caller.OnRemoveChat(false, elasticResult.Message);
+                return;
+            }
+
+            var chatUsers = ((ChatUser[]) elasticResult.Value);
+            var chatUser = chatUsers.FirstOrDefault(cu => cu.UserGuid == user.Guid);
+            if (chatUser == null)
+            {
+                Clients.Caller.OnRemoveChat(false, elasticResult.Message);
+                return;
+            }
+
+            elasticResult = _chatUserRepository.Remove(chatUser.Guid);
+            if (!elasticResult.Success)
+            {
+                Clients.Caller.OnRemoveChat(false, elasticResult.Message);
+                return;
+            }
+
+            if (chatUsers.All(cu => cu.Guid != chatUser.Guid))
+            {
+                elasticResult = _chatRepository.Remove(chatUser.ChatGuid);
+                if (!elasticResult.Success)
+                {
+                    Clients.Caller.OnRemoveChat(false, elasticResult.Message);
+                    return;
+                }
+            }
+
+            Clients.Caller.OnCreateChat(true, null);
+        }
+
+        // Chat: Get Users For Chat
+        public void GetUsersForChat(string guid)
+        {
+            var elasticResult = _userRepository.GetByConnectionId(Context.ConnectionId);
+            if (!elasticResult.Success)
+            {
+                Clients.Caller.OnGetUsersForChat(false, null, null, elasticResult.Message);
+                return;
+            }
+
+            var user = (User)elasticResult.Value; 
+            
+            elasticResult = _chatUserRepository.GetByChatGuid(guid);
+            if (!elasticResult.Success)
+            {
+                Clients.Caller.OnGetUsersForChat(false, null, null, elasticResult.Message);
+                return;
+            }
+
+            var chatUsers = ((ChatUser[]) elasticResult.Value);
+            if (chatUsers == null || chatUsers.Length == 0)
+            {
+                Clients.Caller.OnGetUsersForChat(false, null, null, elasticResult.Message);
+                return;
+            }
+
+            elasticResult =
+                _userRepository.GetByGuids(chatUsers.Select(cu => cu.UserGuid).Where(g => g != user.Guid).ToArray());
+            if (!elasticResult.Success)
+            {
+                Clients.Caller.OnGetUsersForChat(false, null, null, elasticResult.Message);
+                return;
+            }
+
+            var usersGuids = ((User[]) elasticResult.Value).Select(u => u.Guid);
+
+            elasticResult = _chatRepository.Get(guid);
+            if (!elasticResult.Success)
+            {
+                Clients.Caller.OnGetUsersForChat(false, null, null, elasticResult.Message);
+                return;
+            }
+
+            var chat = JsonConvert.SerializeObject((Chat) elasticResult.Value);
+            Clients.Caller.OnGetUsersForChat(true, usersGuids, chat, elasticResult.Message);
+        }
+
+        // Chat: Update chat
+        public void UpdateChat(string guid, string name, string userGuidsString)
+        {
+            var userGuids = JsonConvert.DeserializeObject<string[]>(userGuidsString);
+
+            var elasticResult = _userRepository.GetByConnectionId(Context.ConnectionId);
+            if (!elasticResult.Success)
+            {
+                Clients.Caller.OnUpdateChatError();
+                return;
+            }
+
+            var user = (User) elasticResult.Value;
+
+            var newChat = new Chat(guid, name);
+            elasticResult = _chatRepository.Update(newChat);
+            if (!elasticResult.Success)
+            {
+                Clients.Caller.OnUpdateChatError();
+                return;
+            }
+
+            elasticResult = _chatUserRepository.GetByChatGuid(guid);
+            if (!elasticResult.Success)
+            {
+                Clients.Caller.OnUpdateChatError();
+                return;
+            }
+
+            var chatUsers = (ChatUser[]) elasticResult.Value;
+            foreach (var chatUser in chatUsers.Where(cu => cu.UserGuid != user.Guid))
+            {
+                _chatUserRepository.Remove(chatUser.Guid);
+            }
+
+            foreach (var userGuid in userGuids)
+            {
+                _chatUserRepository.Add(guid, userGuid);
+            }
+
+            elasticResult =
+                _userRepository.GetByGuids(chatUsers.Select(cu => cu.UserGuid).Where(g => g != user.Guid).ToArray());
+            if (!elasticResult.Success)
+            {
+                Clients.Caller.OnUpdateChatError();
+                return;
+            }
+
+            var usersGuids = ((User[])elasticResult.Value).Select(u => u.Guid);
+
+            var chat = JsonConvert.SerializeObject(newChat);
+            Clients.Caller.OnGetUsersForChat(true, usersGuids, chat, elasticResult.Message);
+        }
+
         // Disconnect
         public void Disconnect()
         {
@@ -154,6 +300,7 @@ namespace Web.SignalR.Hubs
                 Clients.Others.OnDisconnectOthers(user.Guid);
             Clients.Caller.OnDisconnectCaller(user.UserName);
         }
+
 
         public override Task OnDisconnected(bool stopCalled)
         {

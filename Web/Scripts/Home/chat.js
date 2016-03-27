@@ -1,7 +1,28 @@
 ﻿$(document).ready(function() {
     
+    var chater = $.connection.chaterHub;
+
+    // Chats methods
+    function getUsersForChat(el) {
+        var chatGuid = $($(el).parent()).attr("data-guid");
+        chater.server.getUsersForChat(chatGuid);
+    }
+
+    function removeChat(el) {
+        if (!confirm("Remove this chat?"))
+            return;
+        var chatGuid = $($(el).parent()).attr("data-guid");
+        chater.server.removeChat(chatGuid);
+    }
+
+
+    // KO model
     var chaterViewModel = {
         users: ko.observableArray(),
+
+        usersForChat: ko.observableArray(),
+
+        editChat: { guid: ko.observable(""), name: ko.observable(""), originName: ko.observable("") },
 
         chats: ko.observableArray()
     }
@@ -37,7 +58,6 @@
     };
     // Users methods - End
 
-    // Chats methods - Start
     chaterViewModel.chats.add = function(guid, name) {
         this.push({ guid: guid, name: name });
     };
@@ -49,6 +69,9 @@
 
     chaterViewModel.chats.addOrEdit = function(guid, name) {
         this.findIndex(guid) === -1 ? this.add(guid, name) : this.edit(guid, name);
+
+        $("#chat" + guid + " .btnChatEdit").click(function () { getUsersForChat(this); });
+        $("#chat" + guid + " .btnChatRemove").click(function () { removeChat(this); });
     };
 
     chaterViewModel.chats.remove = function(guid) {
@@ -69,8 +92,10 @@
 
     ko.applyBindings(chaterViewModel);
     
-    var chater = $.connection.chaterHub;
+    
 
+    // Chat: Chat Remove button Click
+    ;
 
     // Registration: On Result
     chater.client.onRegister = function (result, message) {
@@ -134,8 +159,46 @@
         user.isOnline = false;
         chaterViewModel.users.edit(user.guid, user.name, user.isOnline);
     }
+    
+    // Chat: On Remove Result
+    chater.client.onRemoveResult = function (result, message) {
+        if (!result)
+            alert(message);
+    }
 
+    // Chat: On Get Users For Chat
+    chater.client.onGetUsersForChat = function(result, userGuids, chat, message) {
+        if (!result) {
+            alert(message);
+            return;
+        }
 
+        if (userGuids == null)
+            userGuids = [];
+
+        chaterViewModel.usersForChat.removeAll();
+        for (var i = 0; i < chaterViewModel.users().length; i++) {
+            chaterViewModel.usersForChat.push({
+                userGuid: chaterViewModel.users()[i].guid,
+                userName: chaterViewModel.users()[i].name,
+                isInChat: userGuids.indexOf(chaterViewModel.users()[i].guid) !== -1
+            });
+        }
+
+        var jsonChat = JSON.parse(chat);
+        chaterViewModel.editChat.guid(jsonChat.Guid);
+        chaterViewModel.editChat.name(jsonChat.Name);
+        chaterViewModel.editChat.originName(jsonChat.Name);
+
+        $("#divNewChatButton").addClass("hidden");
+        $("#divNewChat").addClass("hidden");
+        $("#divEditChat").removeClass("hidden");
+    }
+
+    chater.client.onUpdateChatError = function() {
+        alert("Some errors occured");
+    }
+    
 
     chater.connection.start().done(function () {
 
@@ -198,13 +261,36 @@
             $("#divNewChat").addClass("hidden");
         });
 
-        // Chat: New Chat Back button Click
+        // Chat: New Chat Create button Click
         $("#btnNewChatCreate").click(function () {
             $("#divNewChatAlert").addClass("hidden");
             chater.server.createChat($("#tbNewChatName").val());
         });
 
-        // Menu -> Exit
+        
+        // Edit Chat: Back button Click
+        $("#btnEditChatBack").click(function () {
+            $("#divNewChat").addClass("hidden");
+            $("#divEditChat").addClass("hidden");
+            $("#divNewChatButton").removeClass("hidden");
+        });
+
+        // Edit Chat: Update button Click
+        $("#btnEditChatEdit").click(function () {
+            $("#divNewChat").addClass("hidden");
+            $("#divEditChat").addClass("hidden");
+            $("#divNewChatButton").removeClass("hidden");
+            var chatGuid = chaterViewModel.editChat.guid();
+            var chatName = chaterViewModel.editChat.name();
+            var chatUsers = chaterViewModel.usersForChat();
+            var userGuids = [];
+            for (var i = 0; i < chatUsers.length; i++) {
+                userGuids.push(chatUsers[i].userGuid);
+            }
+            chater.server.updateChat(chatGuid, chatName, JSON.stringify(userGuids));
+        });
+
+        // Close
         $("#btnClose").click(function () {
             chater.server.disconnect();
         });
