@@ -10,6 +10,7 @@
     <title>Chater</title>
     <link href="~/Content/Css/Bootstrap/bootstrap.min.css" rel="stylesheet"/>
     <link href="~/Content/Css/Bootstrap/font-awesome.min.css" rel="stylesheet"/>
+    <link href="~/Content/Css/Home/chat.css" rel="stylesheet" />
 </head>
 <body style="height: 100%;">
 <div id="divChater" class="container hidden" style="width: 100%; height: 100%;">
@@ -20,18 +21,10 @@
     </div>
     <div class="row" style="margin: 0 auto; width: 90%; height: 90%;">
         <div id="divChats" class="col-md-3" style="height: 100%; background-color: #f0ffff; border: 1px solid #008b8b; display: flex; flex-direction: column;">
-            <h4>Chats</h4>
-            <div style="flex-grow: 1; border: 1px solid #191970; overflow-y: auto">
+            <div><h4>Chats</h4></div>
+            <div style="flex-grow: 1; border: 1px solid #191970; overflow-y: auto; overflow-x: hidden;">
                 <div data-bind="foreach: chats.slice(0).sort(function(a,b){return a.name.localeCompare(b.name)})">
-                    <div class="col-md-12" data-bind="attr: { 'data-guid': guid, 'id': 'chat'+guid }" style="margin: 5px 0">
-                        <div class="col-md-6" data-bind="text: name"></div>
-                        <div class="btnChatEdit col-md-3">
-                            <i class="btn btn-info fa fa-pencil-square-o fa-md"></i>
-                        </div>
-                        <div class="col-md-3">
-                            <i class="btn btn-danger fa fa-times fa-md"></i>
-                        </div>
-                    </div>
+                    <div class="chat" data-bind="text: name, attr: { 'data-guid': guid }"></div>
                 </div>
             </div>
             <div id="divNewChatButton" class="text-center" style="border: 1px solid #191970; padding: 10px;">
@@ -69,8 +62,24 @@
                 <div id="divEditChatAlert" class="alert alert-danger hidden" style="margin-top: 10px;"></div>
             </div>
         </div>
-        <div id="divChat" class="col-md-6" style="height: 100%; background-color: #f0ffff; border: 1px solid #008b8b;">
-
+        <div id="divChatContainer" class="col-md-6" style="height: 100%; background-color: #f0ffff; border: 1px solid #008b8b;">
+            <div id="divChat" class="hidden">
+                <div>
+                    <h4 data-bind="text: currentChat.name()"></h4>
+                </div>
+                <div style="flex-grow: 1; border: 1px solid #191970; overflow-y: auto; overflow-x: hidden;">
+                </div>
+                <div id="divInputMessage">
+                    <div class="col-md-11" id="divTbMessage">
+                        <input type="text" id="tbMessage" class="form-control"/>
+                    </div>
+                    <div class="col-md-1" id="divBtnMessage">
+                        <div id="btnMessage" class="btn btn-info form-control">
+                            <i class="fa fa-fighter-jet"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
         <div id="divUsers" class="col-md-3" style="height: 100%; background-color: #f0ffff; border: 1px solid #008b8b;">
             <h4>Users</h4>
@@ -123,6 +132,16 @@
             <input type="button" id="btnRegistrationBack" class="btn btn-default h3" value="Back"/>
             <input type="button" id="btnRegistrationOk" class="btn btn-primary h3" value="Register Me"/>
             <div id="divRegistrationAlert" class="alert hidden" style="margin-top: 10px;"></div>
+        </div>
+    </div>
+</div>
+
+<div id="loadingImage" class="hidden">
+    <div>
+        <div>
+            <img src="~/Content/Image/ajax-loader.gif" alt="Loading"/>
+            <br/>
+            <span>Loading, please wait</span>
         </div>
     </div>
 </div>

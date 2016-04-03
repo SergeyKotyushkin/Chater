@@ -24,6 +24,8 @@
 
         editChat: { guid: ko.observable(""), name: ko.observable(""), originName: ko.observable("") },
 
+        currentChat: { guid: ko.observable("Default"), name: ko.observable("Since") },
+
         chats: ko.observableArray()
     }
 
@@ -119,6 +121,31 @@
             var jsonChats = jQuery.parseJSON(chats);
             for (i = 0; i < jsonChats.length; i++)
                 chaterViewModel.chats.addOrEdit(jsonChats[i].Guid, jsonChats[i].Name);
+            
+            $(".chat").each(function () {
+                $(this).click(function () {
+                    $("#loadingImage").removeClass("hidden");
+                    $("#divChat").addClass("hidden");
+                    $.get("api/ChatData/" + $(this).attr("data-guid"), function(jsonData) {
+                            var data = JSON.parse(jsonData);
+                            if (!data.Result) {
+                                alert(data.Message);
+                                return;
+                            }
+
+                            chaterViewModel.currentChat.guid(data.Chat.Guid);
+                            chaterViewModel.currentChat.name(data.Chat.Name);
+
+                            $("#divChat").removeClass("hidden");
+                        })
+                        .fail(function() {
+                            alert("Some error occured. Try again.");
+                        })
+                        .always(function() {
+                            $("#loadingImage").addClass("hidden");
+                        });
+                });
+            });
 
             $("#divLogin").addClass("hidden");
             $("#divChater").removeClass("hidden");
@@ -195,8 +222,18 @@
         $("#divEditChat").removeClass("hidden");
     }
 
-    chater.client.onUpdateChatError = function() {
-        alert("Some errors occured");
+    // Chat: On Updated Result
+    chater.client.OnUpdateChat = function (result, chat, message) {
+        $("#divNewChat").addClass("hidden");
+        $("#divEditChat").addClass("hidden");
+        $("#divNewChatButton").addClass("hidden");
+
+        if (result) {
+            var jsonChat = JSON.parse(chat);
+            chaterViewModel.chats.addOrEdit(jsonChat.Guid, jsonChat.Name);
+        }
+
+        alert(message);
     }
     
 
@@ -289,7 +326,7 @@
             }
             chater.server.updateChat(chatGuid, chatName, JSON.stringify(userGuids));
         });
-
+        
         // Close
         $("#btnClose").click(function () {
             chater.server.disconnect();

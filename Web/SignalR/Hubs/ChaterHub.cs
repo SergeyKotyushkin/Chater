@@ -10,6 +10,8 @@ namespace Web.SignalR.Hubs
 {
     public class ChaterHub : Hub
     {
+        private const string SomeError = "some error#@!";
+
         private readonly IUserRepository _userRepository;
         private readonly IChatRepository _chatRepository;
         private readonly IChatUserRepository _chatUserRepository;
@@ -228,7 +230,7 @@ namespace Web.SignalR.Hubs
             var elasticResult = _userRepository.GetByConnectionId(Context.ConnectionId);
             if (!elasticResult.Success)
             {
-                Clients.Caller.OnUpdateChatError();
+                Clients.Caller.OnUpdateChat(false, null, SomeError);
                 return;
             }
 
@@ -238,14 +240,14 @@ namespace Web.SignalR.Hubs
             elasticResult = _chatRepository.Update(newChat);
             if (!elasticResult.Success)
             {
-                Clients.Caller.OnUpdateChatError();
+                Clients.Caller.OnUpdateChat(false, null, SomeError);
                 return;
             }
 
             elasticResult = _chatUserRepository.GetByChatGuid(guid);
             if (!elasticResult.Success)
             {
-                Clients.Caller.OnUpdateChatError();
+                Clients.Caller.OnUpdateChat(false, null, SomeError);
                 return;
             }
 
@@ -264,14 +266,16 @@ namespace Web.SignalR.Hubs
                 _userRepository.GetByGuids(chatUsers.Select(cu => cu.UserGuid).Where(g => g != user.Guid).ToArray());
             if (!elasticResult.Success)
             {
-                Clients.Caller.OnUpdateChatError();
+                Clients.Caller.OnUpdateChat(false, null, SomeError);
                 return;
             }
 
             var usersGuids = ((User[])elasticResult.Value).Select(u => u.Guid);
 
+            // TODO: update group
+
             var chat = JsonConvert.SerializeObject(newChat);
-            Clients.Caller.OnGetUsersForChat(true, usersGuids, chat, elasticResult.Message);
+            Clients.Caller.OnUpdateChat(true, chat, "Chat updated");
         }
 
         // Disconnect

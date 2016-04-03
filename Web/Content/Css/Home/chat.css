@@ -1,0 +1,81 @@
+﻿html, body {
+    height: 100%;
+}
+
+/* Common START */
+#loadingImage {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 100%;
+    height: 100%;
+    display: table;
+    z-index: 100;
+    -ms-text-shadow: 0 0 3px black;
+    text-shadow: 0 0 3px black;
+}
+
+#loadingImage span {
+    color: white;
+    font-weight: bold;
+}
+#loadingImage > div {
+    display: table-cell;
+    vertical-align: middle;
+    text-align: center;
+}
+#loadingImage > div > div {
+    background-color: #787878;
+    -ms-background-clip: content-box;
+    background-clip: content-box;
+    border-top: 1px solid black;
+    border-bottom: 1px solid black;
+}
+/* Common END */
+
+/* Edit chat START */
+.chat {
+    color: white;
+    -ms-text-shadow: 0 0 3px black, 0 0 8px rgb(80, 89, 196);
+    text-shadow: 0 0 3px black, 0 0 8px rgb(80, 89, 196);
+    background-color: rgb(183, 200, 236);
+    font-weight: bold;
+    text-align: center;
+    border-bottom: 2px solid #3848a7;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    cursor: pointer;
+}
+.chat:hover {
+    color: rgb(80, 89, 196);
+    -ms-text-shadow: none;
+    text-shadow: none;
+    background-color: white;
+    border-bottom: 2px solid #3848a7;
+    cursor: pointer;
+}
+/* Edit chat END*/
+
+/* Message box Start */
+#divInputMessage {
+    padding-top: 10px;
+    padding-bottom: 10px;
+}
+#divTbMessage {
+    padding-left: 0;
+}
+#divBtnMessage {
+    padding-right: 0;
+}
+#btnMessage {
+    text-align: center;
+    padding-right: 0;
+    padding-left: 0;
+}
+
+#divChat {
+    height: 100%;
+    display: flex; 
+    flex-direction: column;
+}
+/* Message box End */

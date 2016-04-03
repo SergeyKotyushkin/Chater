@@ -110,6 +110,7 @@
     <Reference Include="System.Xml.Linq" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ControllersApi\ChatDataController.cs" />
     <Compile Include="ControllersApi\ChatsController.cs" />
     <Compile Include="ControllersApi\ChatUsersController.cs" />
     <Compile Include="ControllersApi\MessagesController.cs" />
@@ -130,8 +131,9 @@
     <Content Include="Content\Css\Bootstrap\bootstrap.min.css" />
     <Content Include="Content\Css\Bootstrap\font-awesome.min.css" />
     <Content Include="Content\Css\fonts\fontawesome-webfont.svg" />
-    <Content Include="Content\Home\chat.css" />
-    <Content Include="Content\Home\index.css" />
+    <Content Include="Content\Css\Home\chat.css" />
+    <Content Include="Content\Css\Home\index.css" />
+    <Content Include="Content\Image\ajax-loader.gif" />
     <Content Include="Global.asax" />
     <Content Include="Content\Css\Bootstrap\bootstrap-theme.min.css.map" />
     <Content Include="Content\Css\Bootstrap\bootstrap.min.css.map" />
