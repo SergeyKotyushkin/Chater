@@ -1,5 +1,4 @@
 ﻿using Logic.ElasticRepository;
-using Logic.MessageRepository;
 using Microsoft.AspNet.SignalR;
 using Microsoft.Owin;
 using Owin;

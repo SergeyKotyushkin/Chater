@@ -1,7 +1,6 @@
 ﻿using System.Linq;
 using System.Web.Http;
 using Logic.ElasticRepository.Contracts;
-using Logic.MessageRepository.Contracts;
 using Logic.Models;
 using Newtonsoft.Json;
 
@@ -35,24 +34,7 @@ namespace Web.ControllersApi
 
             var messages = ((Message[]) elasticResult.Value).OrderBy(m => m.SendTime).ToArray();
 
-            elasticResult = _userRepository.GetByGuids(messages.Select(m => m.UserGuid).Distinct().ToArray());
-            if (!elasticResult.Success)
-                return null;
-
-            var users = (User[]) elasticResult.Value;
-
-            var messageOutput = new MessageOutput[messages.Length];
-            for (var i = 0; i < messages.Length; i++)
-            {
-                var user = users.FirstOrDefault(u => u.Guid == messages[i].UserGuid);
-                if (user == null)
-                    messageOutput[i] = null;
-                else
-                    messageOutput[i] = new MessageOutput(user.UserName, messages[i].Text,
-                        messages[i].SendTime.ToString("G"));
-            }
-
-            return JsonConvert.SerializeObject(messageOutput);
+            return JsonConvert.SerializeObject(messages);
         }
     }
 }

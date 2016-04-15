@@ -20,13 +20,15 @@
     var chaterViewModel = {
         users: ko.observableArray(),
 
+        chats: ko.observableArray(),
+
+        messages: ko.observableArray(),
+
         usersForChat: ko.observableArray(),
 
         editChat: { guid: ko.observable(""), name: ko.observable(""), originName: ko.observable("") },
 
-        currentChat: { guid: ko.observable("Default"), name: ko.observable("Since") },
-
-        chats: ko.observableArray()
+        currentChat: { guid: ko.observable("Default"), name: ko.observable("Since") }
     }
 
 
@@ -60,6 +62,7 @@
     };
     // Users methods - End
 
+    // Chats methods - Start
     chaterViewModel.chats.add = function(guid, name) {
         this.push({ guid: guid, name: name });
     };
@@ -72,8 +75,8 @@
     chaterViewModel.chats.addOrEdit = function(guid, name) {
         this.findIndex(guid) === -1 ? this.add(guid, name) : this.edit(guid, name);
 
-        $("#chat" + guid + " .btnChatEdit").click(function () { getUsersForChat(this); });
-        $("#chat" + guid + " .btnChatRemove").click(function () { removeChat(this); });
+        //$("#chat" + guid + " .btnChatEdit").click(function () { getUsersForChat(this); });
+        //$("#chat" + guid + " .btnChatRemove").click(function () { removeChat(this); });
     };
 
     chaterViewModel.chats.remove = function(guid) {
@@ -90,7 +93,38 @@
     chaterViewModel.chats.find = function(guid) {
         return ko.utils.arrayFirst(this(), function(chat) { return chat.guid === guid; });
     };
-    // Users methods - End
+    // Chats methods - End
+
+    // Messages methods - Start
+    chaterViewModel.messages.add = function (item) {
+        this.push(item);
+    };
+
+    chaterViewModel.messages.edit = function (item) {
+        var index = this.findIndex(item.Guid);
+        this.replace(this()[index], item);
+    };
+
+    chaterViewModel.messages.addOrEdit = function (item) {
+        this.findIndex(item.Guid) === -1 ? this.add(item) : this.edit(item);
+    };
+
+    chaterViewModel.messages.remove = function (guid) {
+        this.remove(function (item) { return item.Guid === guid; });
+    };
+
+    chaterViewModel.messages.findIndex = function (guid) {
+        var items = this();
+        for (var i = 0; i < items.length; i++)
+            if (items[i].Guid === guid) return i;
+        return -1;
+    };
+
+    chaterViewModel.messages.find = function (guid) {
+        return ko.utils.arrayFirst(this(), function (chat) { return chat.guid === guid; });
+    };
+    // Messages methods - End
+
 
     ko.applyBindings(chaterViewModel);
     
@@ -235,6 +269,17 @@
 
         alert(message);
     }
+
+    // ChatBox: On Message Send
+    chater.client.OnSendMessage = function (result, jMessage, error) {
+        if (!result) {
+            alert(error);
+            return;
+        }
+        
+        var message = JSON.parse(jMessage);
+        chaterViewModel.messages.addOrEdit(message);
+    }
     
 
     chater.connection.start().done(function () {
@@ -327,6 +372,16 @@
             chater.server.updateChat(chatGuid, chatName, JSON.stringify(userGuids));
         });
         
+        // Send Message
+        $("#btnMessage").click(function() {
+            var text = $("#tbMessage").val().trim();
+
+            if (!text.length || chaterViewModel.currentChat.guid() == null)
+                return;
+
+            chater.server.sendMessage(chaterViewModel.currentChat.guid(), text);
+        });
+
         // Close
         $("#btnClose").click(function () {
             chater.server.disconnect();

@@ -75,14 +75,13 @@
     <Compile Include="ElasticRepository\Contracts\IEntityRepository.cs" />
     <Compile Include="ElasticRepository\ElasticRepository.cs" />
     <Compile Include="ElasticRepository\EntityRepository.cs" />
-    <Compile Include="MessageRepository\Contracts\IMessageRepository.cs" />
-    <Compile Include="MessageRepository\MessageRepository.cs" />
+    <Compile Include="ElasticRepository\Contracts\IMessageRepository.cs" />
+    <Compile Include="ElasticRepository\MessageRepository.cs" />
     <Compile Include="Models\Chat.cs" />
     <Compile Include="Models\ChatUser.cs" />
     <Compile Include="Models\ElasticResponse.cs" />
     <Compile Include="Models\ElasticResult.cs" />
     <Compile Include="Models\Message.cs" />
-    <Compile Include="Models\MessageOutput.cs" />
     <Compile Include="Models\User.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="StructureMap\AllRegistry.cs" />

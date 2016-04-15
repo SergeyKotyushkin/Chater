@@ -67,7 +67,11 @@
                 <div>
                     <h4 data-bind="text: currentChat.name()"></h4>
                 </div>
-                <div style="flex-grow: 1; border: 1px solid #191970; overflow-y: auto; overflow-x: hidden;">
+                <div class="row" data-bind="foreach: messages" style="flex-grow: 1; border: 1px solid #191970; overflow-y: auto; overflow-x: hidden;">
+                    <div >
+                        <strong data-bind="text: UserName + ' (' + SendTime + '):'"></strong>
+                        <span data-bind="text: Text"></span>
+                    </div>
                 </div>
                 <div id="divInputMessage">
                     <div class="col-md-11" id="divTbMessage">

@@ -1,7 +1,7 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Threading.Tasks;
 using Logic.ElasticRepository.Contracts;
-using Logic.MessageRepository.Contracts;
 using Logic.Models;
 using Microsoft.AspNet.SignalR;
 using Newtonsoft.Json;
@@ -277,6 +277,37 @@ namespace Web.SignalR.Hubs
             var chat = JsonConvert.SerializeObject(newChat);
             Clients.Caller.OnUpdateChat(true, chat, "Chat updated");
         }
+
+        // ChatBox: Send Message
+        public void SendMessage(string chatGuid, string text)
+        {
+            var elasticResult = _userRepository.GetByConnectionId(Context.ConnectionId);
+            if (!elasticResult.Success || (User)elasticResult.Value == null)
+            {
+                Clients.Caller.OnSendMessage(false, null, "User not found");
+                return;
+            }
+
+            var user = (User) elasticResult.Value;
+
+            elasticResult = _chatRepository.Get(chatGuid);
+            if (!elasticResult.Success || (Chat)elasticResult.Value == null)
+            {
+                Clients.Caller.OnSendMessage(false, null, "Chat not found");
+                return;
+            }
+            
+            elasticResult = _messageRepository.Add(chatGuid, user.Guid, text);
+            if (!elasticResult.Success)
+            {
+                Clients.Caller.OnSendMessage(false, null, elasticResult.Message);
+                return;
+            }
+
+            var message = JsonConvert.SerializeObject((Message) elasticResult.Value);
+            Clients.All.OnSendMessage(true, message, null);
+        }
+
 
         // Disconnect
         public void Disconnect()
